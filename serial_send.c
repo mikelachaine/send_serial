@@ -1,5 +1,5 @@
 /*
- * serial_chat_full.c  –  version sans fonction inutilisée
+ * serial_send.c  – version 1.0
  *
  * Fonctionnalités :
  *   • options -d <device>, -b <baud>, -l (liste des bauds), -h (aide)
