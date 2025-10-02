@@ -1,0 +1,12939 @@
+HF/50/144/430MHz ALL MODE TRANSCEIVER
+
+CAT Operation Reference Manual
+Important Notes
+The CAT operation does not work with MAIN Firmware before Ver. 1.08.
+Please update the MAIN firmware to Ver. 1.08 or later.
+How to Confirm the Firmware Version
+1. Press and hold the [FUNC] knob.
+
+2. Touch [EXTENSION SETTING].
+If [EXTENSION SETTING] is not displayed,
+touch [FWD→] to display [EXTENSION
+SETTING] and then touch it.
+
+3. Touch [SOFT VERSION].
+The versions of each firmware will be
+displayed on the TFT screen.
+
+Current MAIN firmware version
+
+CAT (Computer Aided Transceiver) Operation
+Overview
+The CAT (Computer Aided Transceiver) System in the FTX-1 series transceiver provides control of frequency,
+VFO, memory, and other settings using an external personal computer. This allows multiple control operations to
+be fully automated with single mouse clicks, or keystroke operations on the computer keyboard.
+YAESU MUSEN does not produce CAT System operating software due to the wide variety of personal computers
+and operating systems in use today. However, the information provided in this chapter explains the serial data
+structure and opcodes used by the CAT system. This information, along with the short programming examples,
+is intended to help you start writing programs on your own. As you become more familiar with CAT operation,
+you can customize programs for your operating needs and utilize the full operating potential of this system.
+
+Using the USB Cable (CAT-1 / CAT-2)
+The FTX-1 transceiver has a built-in USB to Dual UART Bridge, allowing direct connection from the side-panel USB
+jack to the USB jack of a computer without the need for an interface device, simply use a USB cable to connect
+to the USB jack on the computer.
+PC
+To connect to a PC using a USB cable,
+a Virtual COM port driver must be installed on the PC.
+Visit the Yaesu website http://www.yaesu.com/ to download the Virtual COM
+port driver and Installation Manual.
+
+USB Cable
+USB
+
+USB type-C
+FTX-1 field
+
+How to Confirm the Installation, and the COM Port Number
+After the FTX-1 and computer are connected, confirm that the virtual COM driver has been installed successfully:
+1. Press and hold the power switch to turn the transceiver ON.
+2. Connect the transceiver and PC with a commercially available USB cable (type-C).
+3. Open the “Device Manager” screen in Windows.
+4. On the Device Manager screen, double-click “Port (COM & LPT)”.
+
+“Silicon Labs Dual CP210x USB to UART Bridge : Enhanced COM Port (COM**)”
+“Silicon Labs Dual CP210x USB to UART Bridge : Standard COM Port (COM**)”
+*(The number in the “(COM**)” portion may vary from computer to computer.)
+The above example indicates that COM5 can be used for CAT communications (CAT-1), while COM6 can
+be used for TX control (PTT, CW Keying, Digital Mode Operation) or CAT communications (CAT-2).
+When performing software port configuration, select the COM port numbers that were confirmed using the
+procedure above.
+If a “!” or “X” is displayed for the port on the Device Manager, uninstall and reinstall the virtual
+COM driver.
+1
+
+CAT (Computer Aided Transceiver) Operation
+The FTX-1 contains two virtual COM ports, an Enhanced COM Port and a Standard COM Port.
+These ports offer the following functions:
+• Enhanced COM Port (CAT-1): CAT Communications (Frequency and Communication Mode Settings)
+• Standard COM Port (CAT-2): TX Controls (PTT control, CW Keying, Digital Mode Operation) or CAT
+Communications (Frequency and Communication Mode Settings)*
+When performing software port configuration, select the COM port numbers that were confirmed using the
+procedure above, use the two confirmed COM port numbers for each software function. The frequency and
+communication mode and PTT control can be set from the software, and CW keying, digital communication,
+etc. can be performed simultaneously.
+*NOTE: (When using a standard COM port (CAT-2) for CAT communication (setting frequency, communication
+mode, etc.) and using hardware flow control by RTS or DTR, be sure to set the following menu items to “OFF”
+(factory default) to disable PTT control by RTS or DTR.)
+Menu Item
+
+RADIO SETTING
+
+MODE SSB
+MODE AM
+MODE FM
+MODE DATA
+MODE RTTY
+
+CW SETTING
+
+MODE CW
+
+PRESET
+
+PRESET1 - 5
+
+Menu Function
+RPTT SELECT
+RPTT SELECT
+RPTT SELECT
+RPTT SELECT
+RPTT SELECT
+RPTT SELECT
+PC KEYING
+RPTT SELECT
+
+Available Settings (Default: Bold)
+OFF / RTS / DTR
+OFF / RTS / DTR
+OFF / RTS / DTR
+OFF / RTS / DTR
+OFF / RTS / DTR
+OFF / RTS / DTR
+OFF / RTS / DTR
+OFF / RTS / DTR
+
+• If a transceiver with a different serial number is connected and turned on, different COM port numbers
+will be assigned to it, making it possible to perform individual COM port configurations for separate
+transceivers.
+• When using the USB cable for TX control, the transceiver may switch to the transmit mode when the
+computer is started.
+• Always close the application on the computer before disconnecting the USB cable.
+
+2
+
+CAT (Computer Aided Transceiver) Operation
+Using the UART (CAT-3)
+The TUNER/LINEAR jack on the rear panel of the FTX-1 field head can be used for CAT communication (5V
+CMOS level serial communication).
+Set to “CAT-3” in the setting menu [OPERATION SETTING] → [GENERAL] → [TUN/LIN PORT SELECT]. (Factory
+setting: OPTION)
+• Since the serial communication of this jack is 5V CMOS level, it cannot be directly connected to the
+RS-232C terminal of the PC.
+• The connection cable must be prepared by yourself using the optional band data cable T9207451A
+(mini DIN 10-pin to DIN 10-pin).
+• CAT communication cannot be used simultaneously with an external antenna tuner or linear amplifier.
+
++13.8V
+
+GND
+
+TX D
+
+RX D
+
+Pin Name
+
+I/O
+
+Function
+
++13V
+
+–
+
+13 VDC output linked to radio ON
+
+GND
+
+–
+
+Signal Ground
+
+TXD
+
+Output
+
+Outputs the Serial Data from the transceiver to the PC (5V CMOS)
+
+RXD
+
+Input
+
+Inputs the Serial Data from the PC to the transceiver (5V CMOS)
+
+Communication Parameters
+
+• Asynchronous communication
+• Baud rate: 38400bps* (CAT-1, CAT-3 terminals) or 4800bps* (CAT-2 terminal)
+• Start bit:
+1
+• Data bits: 8
+• Stop bits: 1 or 2* (CAT-2: 1 (Fixed))
+• Paritybits: None
+*(Factory default)
+
+CAT communication settings can be changed using the following menu items.
+Menu Item
+
+OPERATION SETTING
+
+GENERAL
+
+Menu Function
+CAT-1 RATE
+CAT-1 TIME OUT TIMER
+CAT-1 CAT-3 STOP BIT
+CAT-2 RATE
+CAT-2 TIME OUT TIMER
+CAT-3 RATE
+CAT-3 TIME OUT TIMER
+
+3
+
+Available Settings (Default: Bold)
+4800 / 9600 / 19200 / 38400 / 115200 (bps)
+10 / 100 / 1000 / 3000 (msec)
+1bit / 2bit
+4800 / 9600 / 19200 / 38400 / 115200 (bps)
+10 / 100 / 1000 / 3000 (msec)
+4800 / 9600 / 19200 / 38400 / 115200 (bps)
+10 / 100 / 1000 / 3000 (msec)
+
+CAT (Computer Aided Transceiver) Operation
+Control Command
+A computer control command is composed of an alphabetical command, various parameters, and the terminator
+that signals the end of the control command.
+Example: Set the MAIN-side frequency to 14.250000 MHz.
+FA
+
+Command
+
+014250000 ;
+
+
+Parameter Terminator
+
+There are three commands for the FTX-1 as shown below:
+Set command: Set a particular condition
+Read command: Reads an answer		
+Answer command: Transmits a condition
+
+(to the FTX-1)
+(from the FTX-1)
+(from the FTX-1)
+
+For example, note the following case of the FA command (Set the MAIN-side frequency):
+ To set the MAIN-side frequency to 14.250000 MHz, the following command is sent from the computer to the
+transceiver:
+		
+“FA014250000;” (Set command)
+ To read the MAIN-side frequency, the following command is sent from the computer to the transceiver:
+		
+“FA;” (Read command)
+ When the Read command above has been sent, the following command is returned to the computer:
+		
+“FA014250000;” (Answer command)
+
+Alphabetical Commands
+A command consists of 2 alphabetical characters.
+You may use either lower or upper case characters. The commands available for this transceiver are listed in the
+“PC Control Command Tables” on the following pages.
+
+Parameters
+Parameters are used to specify information necessary to implement the desired command.
+The parameters to be used for each command are predetermined. The number of digits assigned to each parameter is also predetermined. Refer to the “Control Command List” and the “Control Command Tables” to configure
+the appropriate parameters.
+When configuring parameters, be careful not to make the following mistakes.
+For example,
+when the correct parameter is “IS00+1000” (IF SHIFT):
+IS001000;
+Not enough parameters specified (No direction (+) given for the IF shift)
+IS00+100;
+Not enough digits (Only three frequency digits given)
+IS00_+_1000;
+Unnecessary characters between parameters
+IS00+10000;
+Too many digits (Five frequency digits given)
+Note: If a particular parameter is not applicable to the FTX-1, the parameter digits should be filled using any
+character except the ASCII control codes (00 to 1Fh) and the terminator (;).
+
+Terminator
+To signal the end of a command, it is necessary to use a semicolon (;). The digit where this special character must
+appear differs depending on the command used.
+
+4
+
+CAT (Computer Aided Transceiver) Operation
+CAT Control Command List
+Command
+
+Function
+
+Set Read Ans.
+
+AI
+
+Command
+
+O
+
+X
+
+MR
+
+MEMORY READ
+
+X
+
+O
+
+O
+
+X
+
+METER SW
+
+O
+
+O
+
+O
+
+O
+
+O
+
+O
+
+X
+
+Function
+
+Set Read Ans.
+
+AI
+
+AB
+
+MAIN-side to SUB-side
+
+AC
+
+ANTENNA TUNER
+CONTROL
+
+O
+
+O
+
+O
+
+O
+
+MS
+
+AG
+
+AF GAIN
+
+O
+
+O
+
+O
+
+O
+
+MT
+
+MEMORY CHANNEL
+WRITE/TAG
+
+O
+
+AI
+
+AUTO INFORMATION
+
+O
+
+O
+
+O
+
+X
+
+MW
+
+MEMORY WRITE
+
+O
+
+X
+
+X
+
+X
+
+AM
+
+MAIN-side to MEMORY
+CHANNEL
+
+O
+
+X
+
+X
+
+X
+
+MX
+
+MOX SET
+
+O
+
+O
+
+O
+
+O
+
+AO
+
+AMC OUTPUT LEVEL
+
+O
+
+O
+
+O
+
+O
+
+MZ
+
+SPLIT MEMORY
+
+O
+
+O
+
+O
+
+O
+
+BA
+
+SUB-side to MAIN-side
+
+O
+
+X
+
+X
+
+X
+
+NA
+
+NARROW
+
+O
+
+O
+
+O
+
+O
+
+BC
+
+AUTO NOTCH (DNF)
+
+O
+
+O
+
+O
+
+O
+
+NL
+
+NOISE BLANKER LEVEL
+
+O
+
+O
+
+O
+
+O
+
+BD
+
+BAND DOWN
+
+O
+
+X
+
+X
+
+X
+
+OI
+
+OPPOSITE BAND (SUB-side)
+INFORMATION
+
+X
+
+O
+
+O
+
+O
+
+BI
+
+BREAK-IN
+
+O
+
+O
+
+O
+
+O
+
+OS
+
+OFFSET (Repeater Shift)
+
+O
+
+O
+
+O
+
+O
+
+BM
+
+SUB-side to MEMORY
+CHANNEL
+
+O
+
+X
+
+X
+
+X
+
+PA
+
+PRE-AMP (IPO)
+
+O
+
+O
+
+O
+
+O
+
+BP
+
+MANUAL NOTCH
+
+O
+
+O
+
+O
+
+O
+
+PB
+
+PLAY BACK
+
+O
+
+O
+
+O
+
+X
+
+BS
+
+BAND SELECT
+
+O
+
+X
+
+X
+
+X
+
+PC
+
+POWER CONTROL
+
+O
+
+O
+
+O
+
+O
+
+BU
+
+BAND UP
+
+O
+
+X
+
+X
+
+X
+
+PL
+
+SPEECH PROCESSOR
+LEVEL
+
+O
+
+O
+
+O
+
+O
+
+CF
+
+CLAR (Clarifier)
+
+O
+
+O
+
+O
+
+O
+
+PR
+
+SPEECH PROCESSOR
+
+O
+
+O
+
+O
+
+O
+
+CH
+
+CHANNEL UP/DOWN
+
+O
+
+X
+
+X
+
+X
+
+PS
+
+POWER SWITCH
+
+O
+
+O
+
+O
+
+X
+
+CN
+
+CTCSS NUMBER
+
+O
+
+O
+
+O
+
+O
+
+QI
+
+QMB STORE
+
+O
+
+X
+
+X
+
+X
+
+CO
+
+CONTOUR/APF
+
+O
+
+O
+
+O
+
+O
+
+QR
+
+QMB RECALL
+
+O
+
+X
+
+X
+
+X
+
+CS
+
+CW SPOT
+
+O
+
+O
+
+O
+
+O
+
+RA
+
+RF ATTENUATOR
+
+O
+
+O
+
+O
+
+O
+
+CT
+
+CTCSS
+
+O
+
+O
+
+O
+
+O
+
+RG
+
+RF GAIN
+
+O
+
+O
+
+O
+
+O
+
+RI
+
+RADIO INFORMATION
+
+X
+
+O
+
+O
+
+O
+
+RL
+
+NOISE REDUCTION (DNR)
+LEVEL
+
+O
+
+O
+
+O
+
+O
+
+RM
+
+READ METER
+
+X
+
+O
+
+O
+
+O
+
+SC
+
+SCAN
+
+O
+
+O
+
+O
+
+O
+
+SD
+
+SEMI BREAK-IN DELAY
+TIME
+
+O
+
+O
+
+O
+
+O
+
+X
+
+X
+
+DA
+
+LCD CONTRAST/DIMMER
+
+O
+
+O
+
+O
+
+X
+
+DN
+
+DOWN
+
+O
+
+X
+
+X
+
+X
+
+DT
+
+DATE AND TIME
+
+O
+
+O
+
+O
+
+X
+
+EX
+
+MENU
+
+O
+
+O
+
+O
+
+O
+
+FA
+
+FREQUENCY MAIN-side
+
+O
+
+O
+
+O
+
+O
+
+FB
+
+FREQUENCY SUB-side
+
+O
+
+O
+
+O
+
+O
+
+FN
+
+FINE TUNING
+
+O
+
+O
+
+O
+
+O
+
+SF
+
+SUB DIAL
+
+O
+
+O
+
+O
+
+O
+
+FR
+
+FUNCTION RX
+
+O
+
+O
+
+O
+
+O
+
+SH
+
+WIDTH
+
+O
+
+O
+
+O
+
+O
+
+FT
+
+FUNCTION TX
+
+O
+
+O
+
+O
+
+O
+
+SM
+
+S METER
+
+X
+
+O
+
+O
+
+X
+
+GP
+
+GP OUT A/B/C/D
+
+O
+
+O
+
+O
+
+X
+
+SQ
+
+SQUELCH LEVEL
+
+O
+
+O
+
+O
+
+O
+
+GT
+
+AGC FUNCTION
+
+O
+
+O
+
+O
+
+O
+
+SS
+
+SPECTRUM SCOPE
+
+O
+
+O
+
+O
+
+O
+
+ID
+
+IDENTIFICATION
+
+X
+
+O
+
+O
+
+X
+
+ST
+
+SPLIT
+
+O
+
+O
+
+O
+
+O
+
+IF
+
+INFORMATION (MAINside)
+
+X
+
+O
+
+O
+
+O
+
+SV
+
+SWAP VFO
+
+O
+
+X
+
+X
+
+X
+
+IS
+
+IF SHIFT
+
+O
+
+O
+
+O
+
+O
+
+TS
+
+TXW
+
+O
+
+O
+
+O
+
+O
+
+KM
+
+KEYER MEMORY
+
+O
+
+O
+
+O
+
+X
+
+TX
+
+TX SET
+
+O
+
+O
+
+O
+
+O
+
+KP
+
+KEY PITCH
+
+O
+
+O
+
+O
+
+O
+
+UP
+
+UP
+
+O
+
+X
+
+X
+
+X
+
+KR
+
+KEYER
+
+O
+
+O
+
+O
+
+O
+
+VD
+
+VOX DELAY TIME
+
+O
+
+O
+
+O
+
+O
+
+KS
+
+KEY SPEED
+
+O
+
+O
+
+O
+
+O
+
+VE
+
+FIRMWARE VERSION
+
+X
+
+O
+
+O
+
+X
+
+KY
+
+CW KEYING MEMORY
+PLAY
+
+O
+
+X
+
+X
+
+X
+
+VG
+
+VOX GAIN
+
+O
+
+O
+
+O
+
+O
+
+VM
+
+[V/M(MW)] KEY FUNCTION
+
+O
+
+X
+
+X
+
+X
+
+LK
+
+LOCK
+
+O
+
+O
+
+O
+
+O
+
+VM
+
+[V/M(MW)] KEY FUNCTION
+
+O
+
+O
+
+O
+
+O
+
+LM
+
+LOAD MESSAGE
+
+O
+
+O
+
+O
+
+X
+
+VS
+
+VFO SELECT
+
+O
+
+O
+
+O
+
+O
+
+MA
+
+MEMORY CHANNEL to
+MAIN-side
+MEMORY CHANNEL to
+SUB-side
+
+O
+
+X
+
+X
+
+X
+
+VX
+
+VOX
+
+O
+
+O
+
+O
+
+O
+
+O
+
+X
+
+X
+
+X
+
+ZI
+
+ZERO IN
+
+O
+
+X
+
+X
+
+X
+
+MC
+
+MEMORY CHANNEL
+
+O
+
+O
+
+O
+
+X
+
+MB
+MD
+
+MODE
+
+O
+
+O
+
+O
+
+O
+
+MG
+
+MIC GAIN
+
+O
+
+O
+
+O
+
+O
+
+ML
+
+MONITOR LEVEL
+
+O
+
+O
+
+O
+
+O
+
+5
+
+CAT (Computer Aided Transceiver) Operation
+AB
+Set
+Read
+Answer
+
+AC
+Set
+
+Read
+
+Answer
+
+AG
+Set
+Read
+Answer
+
+AI
+Set
+Read
+Answer
+
+AM
+Set
+Read
+Answer
+
+AO
+Set
+Read
+Answer
+
+BA
+Set
+Read
+Answer
+
+MAIN-side to SUB-side
+1
+
+2
+
+3
+
+A
+
+B
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+7
+
+8
+
+9
+
+10
+
+ANTENNA TUNER CONTROL
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+A
+
+C
+
+P1 P2 P3
+
+;
+
+1
+
+2
+
+3
+
+A
+
+C
+
+;
+
+1
+
+2
+
+3
+
+A
+
+C
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 P2 P3
+
+;
+
+8
+
+9
+
+10
+
+P1 0: Internal Antenna Tuner (FTX-1 optima)
+1: External Antenna Tuner
+P2 0: External Antenna Tuner
+1: 2: ATAS
+P3 P2=0 (Antenna Tuner):
+		 0: Tuner “OFF” (Tuning Stop)
+		 1: Tuner “ON”
+		 2: 		 3: Tuning Start
+P2=2 (ATAS):
+		 0: Tuning Stop
+		 1: Tuning frequency up (50 msec)
+		 2: Tuning frequency down (50 msec)
+		 3: Tuning Start
+
+AF GAIN
+1
+
+2
+
+3
+
+6
+
+7
+
+A
+
+G
+
+P1 P2 P2 P2
+
+4
+
+;
+
+1
+
+2
+
+3
+
+4
+
+A
+
+G
+
+P1
+
+;
+4
+
+5
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+A
+
+G
+
+P1 P2 P2 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 000 - 255
+
+AUTO INFORMATION
+1
+
+2
+
+3
+
+4
+
+A
+
+I
+
+P1
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+A
+
+I
+
+;
+
+1
+
+2
+
+3
+
+4
+
+A
+
+I
+
+P1
+
+;
+
+P1 0: Auto Information “OFF”
+1: Auto Information “ON”
+NOTES:
+• When the status of the radio changes, the Read value of the AI applicable command (see
+“CAT Control Command List” (page 5)) is automatically sent to the PC.
+• Set ON/OFF for each CAT-1, CAT-2, and CAT-3.
+• This parameter is set to “0” (OFF) automatically when the transceiver is turned “OFF”.
+
+MAIN-SIDE TO MEMORY CHANNEL
+1
+
+2
+
+3
+
+A
+
+M
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+7
+
+8
+
+9
+
+10
+
+AMC OUTPUT LEVEL
+1
+
+2
+
+3
+
+5
+
+6
+
+A
+
+O
+
+P1 P1 P1
+
+4
+
+;
+
+1
+
+2
+
+3
+
+A
+
+O
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+5
+
+6
+
+A
+
+O
+
+P1 P1 P1
+
+;
+
+P1 001-100: AMC OUTPUT LEVEL
+
+SUB-side to MAIN-side
+1
+
+2
+
+3
+
+B
+
+A
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+CAT (Computer Aided Transceiver) Operation
+BC
+Set
+Read
+Answer
+
+BD
+Set
+Read
+Answer
+
+BI
+Set
+Read
+Answer
+
+BM
+Set
+Read
+Answer
+
+BP
+Set
+Read
+Answer
+
+BS
+Set
+Read
+Answer
+
+BU
+Set
+Read
+Answer
+
+AUTO NOTCH (DNF)
+1
+
+2
+
+3
+
+4
+
+5
+
+B
+
+C
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+B
+
+C
+
+P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+B
+
+C
+
+P1 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: Auto Notch “OFF”
+1: Auto Notch “ON”
+
+BAND DOWN
+1
+
+2
+
+3
+
+4
+
+B
+
+D
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 0: MAIN-side
+1: SUB-side
+
+BREAK-IN
+1
+
+2
+
+3
+
+4
+
+B
+
+I
+
+P1
+
+;
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+B
+
+I
+
+;
+
+1
+
+2
+
+3
+
+4
+
+B
+
+I
+
+P1
+
+;
+
+P1 0: Break-in “OFF”
+1: Break-in “ON”
+
+SUB-side to MEMORY CHANNEL
+1
+
+2
+
+3
+
+B
+
+M
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+MANUAL NOTCH
+1
+
+2
+
+3
+
+4
+
+B
+
+P
+
+P1 P2 P3 P3 P3
+
+;
+
+1
+
+2
+
+3
+
+B
+
+P
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+5
+
+B
+
+P
+
+4
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 P2 P3 P3 P3
+
+;
+
+4
+
+5
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: Manual NOTCH “ON/OFF”
+1: Manual NOTCH Frequency
+P3 P2=0
+		
+000: “OFF”
+001: “ON”
+P2=1
+		 001 - 320 (NOTCH Frequency : x 10 Hz )
+
+BAND SELECT
+1
+
+2
+
+3
+
+5
+
+6
+
+B
+
+S
+
+P1 P2 P2
+
+4
+
+;
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 0: MAIN-side
+1: SUB-side
+P2 00: 1.8 MHz
+01: 3.5 MHz
+02: 5 MHz
+03: 7 MHz
+
+BAND UP
+1
+
+2
+
+3
+
+4
+
+B
+
+U
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 0: MAIN-side
+1: SUB-side
+
+7
+
+04: 10 MHz
+05: 14 MHz
+06: 18 MHz
+07: 21 MHz
+
+08: 24.5 MHz
+12: AIR
+09: 28 MHz
+13: 144 MHz
+10: 50 MHz
+14: 430 MHz
+11: 70 MHz/GEN
+
+CAT (Computer Aided Transceiver) Operation
+CF
+Set
+
+Read
+
+Answer
+
+CH
+Set
+Read
+Answer
+
+CN
+Set
+Read
+Answer
+
+CO
+Set
+Read
+Answer
+
+CLAR ON/OFF
+1
+
+2
+
+3
+
+4
+
+10
+
+11
+
+C
+
+F
+
+P1 P2 P3 P4 P5 P6 P7 P8
+
+;
+
+1
+
+2
+
+3
+
+5
+
+6
+
+C
+
+F
+
+P1 P2 P3
+
+;
+
+1
+
+2
+
+3
+
+6
+
+C
+
+F
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+7
+
+8
+
+9
+
+10
+
+11
+
+7
+
+8
+
+9
+
+10
+
+11
+
+P1 P2 P3 P4 P5 P6 P7 P8
+
+;
+
+4
+
+5
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: (Fixed)
+P3 0: CLAR Setting
+1: CLAR Frequency
+P3=0 (CLAR Setting):
+P4
+0: RX CLAR OFF
+			
+1: RX CLAR ON
+P5
+0: TX CLAR OFF
+			
+1: TX CLAR ON
+P6-P8 0: (Fixed)
+
+P3=1 (CLAR Frequency):
+P4
++/P5-P8 0000 - 9999 Hz
+
+CHANNEL UP/DOWN
+1
+
+2
+
+3
+
+4
+
+C
+
+H
+
+P1
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 0: Memory Channel “UP”
+1: Memory Channel “DOWN”
+
+CTCSS TONE FREQUENCY / DCS CODE
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+C
+
+N
+
+P1 P2 P3 P3 P3
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+C
+
+N
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+5
+
+C
+
+N
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 P2 P3 P3 P3
+
+;
+
+4
+
+000
+001
+002
+003
+004
+005
+006
+007
+008
+
+67.0 Hz
+69.3 Hz
+71.9 Hz
+74.4 Hz
+77.0 Hz
+79.7 Hz
+82.5 Hz
+85.4 Hz
+88.5 Hz
+
+000
+001
+002
+003
+004
+005
+006
+007
+008
+009
+010
+011
+012
+013
+014
+
+023
+025
+026
+031
+032
+036
+043
+047
+051
+053
+054
+065
+071
+072
+073
+
+009
+010
+011
+012
+013
+014
+015
+016
+017
+
+015
+016
+017
+018
+019
+020
+021
+022
+023
+024
+025
+026
+027
+028
+029
+
+000 - 049: Tone Frequency Number (See Table 1)
+000 - 103: DCS Number (See Table 2)
+
+Table 1 (CTCSS Tone Chart)
+
+91.5 Hz
+94.8 Hz
+97.4 Hz
+100.0 Hz
+103.5 Hz
+107.2 Hz
+110.9 Hz
+114.8 Hz
+118.8 Hz
+
+074
+114
+115
+116
+122
+125
+131
+132
+134
+143
+145
+152
+155
+156
+162
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: CTCSS
+1: DCS
+P3 P2=0 (CTCSS)
+P2=1 (DCS)
+
+018
+019
+020
+021
+022
+023
+024
+025
+026
+
+123.0 Hz
+127.3 Hz
+131.8 Hz
+136.5 Hz
+141.3 Hz
+146.2 Hz
+151.4 Hz
+156.7 Hz
+159.8 Hz
+
+027
+028
+029
+030
+031
+032
+033
+034
+035
+
+162.2 Hz
+165.5 Hz
+167.9 Hz
+171.3 Hz
+173.8 Hz
+177.3 Hz
+179.9 Hz
+183.5 Hz
+186.2 Hz
+
+Table 2 (DCS Code Chart)
+
+030
+031
+032
+033
+034
+035
+036
+037
+038
+039
+040
+041
+042
+043
+044
+
+165
+172
+174
+205
+212
+223
+225
+226
+243
+244
+245
+246
+251
+252
+255
+
+045
+046
+047
+048
+049
+050
+051
+052
+053
+054
+055
+056
+057
+058
+059
+
+261
+263
+265
+266
+271
+274
+306
+311
+315
+325
+331
+332
+343
+346
+351
+
+060
+061
+062
+063
+064
+065
+066
+067
+068
+069
+070
+071
+072
+073
+074
+
+036
+037
+038
+039
+040
+041
+042
+043
+044
+
+356
+364
+365
+371
+411
+412
+413
+423
+431
+432
+445
+446
+452
+454
+455
+
+189.9 Hz
+192.8 Hz
+196.6 Hz
+199.5 Hz
+203.5 Hz
+206.5 Hz
+210.7 Hz
+218.1 Hz
+225.7 Hz
+
+075
+076
+077
+078
+079
+080
+081
+082
+083
+084
+085
+086
+087
+088
+089
+
+462
+464
+465
+466
+503
+506
+516
+523
+526
+532
+546
+565
+606
+612
+624
+
+045
+046
+047
+048
+049
+-
+
+090
+091
+092
+093
+094
+095
+096
+097
+098
+099
+100
+101
+102
+103
+-
+
+229.1 Hz
+233.6 Hz
+241.8 Hz
+250.3 Hz
+254.1 Hz
+-
+
+627
+631
+632
+654
+662
+664
+703
+712
+723
+731
+732
+734
+743
+754
+-
+
+CONTOUR
+1
+
+2
+
+3
+
+8
+
+9
+
+C
+
+O
+
+P1 P2 P3 P3 P3 P3
+
+4
+
+5
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+C
+
+O
+
+P1 P2
+
+;
+5
+
+4
+
+6
+
+7
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+10
+
+1
+
+2
+
+3
+
+8
+
+9
+
+C
+
+O
+
+P1 P2 P3 P3 P3 P3
+
+;
+
+P1 0: MAIN-side
+P3 P2=0 0000: CONTOUR “OFF”
+1: SUB-side			
+0001: CONTOUR “ON”
+P2 0: CONTOUR “ON/OFF”		
+P2=1 0010 - 3200
+1: CONTOUR FREQ			
+(CONTOUR Frequency:10 - 3200Hz)
+2: APF “ON/OFF”		
+P2=2 0000: APF “OFF”
+3: APF FREQ			
+0001: APF “ON”
+			
+P2=3 0000 - 0050 (APF Frequency: -250 - 250 Hz )
+
+8
+
+CAT (Computer Aided Transceiver) Operation
+CS
+Set
+Read
+Answer
+
+CT
+Set
+Read
+Answer
+
+DA
+Set
+Read
+Answer
+
+DN
+Set
+Read
+Answer
+
+DT
+Set
+Read
+Answer
+
+EO
+Set
+Read
+Answer
+
+EX
+Set
+Read
+Answer
+
+CW SPOT
+1
+
+2
+
+3
+
+4
+
+C
+
+S
+
+P1
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+C
+
+S
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+C
+
+S
+
+P1
+
+;
+
+P1 0: CW SPOT “OFF”
+1: CW SPOT “ON”
+
+SQL TYPE
+1
+
+2
+
+3
+
+4
+
+C
+
+T
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+C
+
+T
+
+P1
+
+;
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+1
+
+2
+
+3
+
+4
+
+5
+
+C
+
+T
+
+P1 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: CTCSS “OFF”
+1: CTCSS ENC “ON” / DEC “OFF”
+2: CTCSS ENC “ON” / DEC “ON”
+3: DCS “ON”
+4: PR FREQ
+5: REV TONE
+
+DIMMER
+1
+
+2
+
+3
+
+10
+
+11
+
+D
+
+A
+
+P1 P1 P2 P2 P3 P3 P4 P4
+
+4
+
+5
+
+;
+
+1
+
+2
+
+3
+
+D
+
+A
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+1
+
+2
+
+3
+
+10
+
+11
+
+D
+
+A
+
+P1 P1 P2 P2 P3 P3 P4 P4
+
+;
+
+P1
+P2
+P3
+P4
+
+00: (Fixed)
+00 - 20: TFT Display Contrast
+00 - 20: TFT Display Brightness Level
+00 - 20: LED Indicators Brightness Level
+
+MIC DOWN
+1
+
+2
+
+3
+
+D
+
+N
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+DATE AND TIME
+1
+
+2
+
+3
+
+n
+
+T
+
+P1 P2 P2 P2 P2
+
+~
+~
+
+n-1
+
+D
+
+P2
+
+;
+
+4
+
+1
+
+2
+
+3
+
+4
+
+D
+
+T
+
+P1
+
+;
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+~
+~
+
+n-1
+
+n
+
+P2
+
+;
+
+8
+
+1
+
+2
+
+3
+
+D
+
+T
+
+P1 P2 P2 P2 P2
+
+P1 0: Date
+1: Time (Local)
+P2 P1=0
+yyyymmdd (Year/Month/Date)
+P1=1
+hhmmss (Hour/Minute/Second, 24 hour time system)
+
+ENCODER OFFSET
+1
+
+2
+
+3
+
+9
+
+10
+
+E
+
+O
+
+P1 P2 P3 P4 P5 P5 P5
+
+4
+
+5
+
+6
+
+7
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+P1 0: MAIN-side
+P4 P2=0
+1: SUB-side		
+0: Hz
+2: MAIN-side and SUB-side		
+1: kHz
+P2 0: MAIN dial		
+2: MHz
+1: FUNC knob
+P2=1
+P3 +: Up
+0: fix
+-: Down
+P5 000 - 999
+
+MENU
+1
+
+2
+
+3
+
+**
+
+X
+
+P1 P1 P2 P2 P3 P3 P4
+
+~
+~
+
+nn
+
+E
+
+P4
+
+;
+
+10
+
+nn
+
+**
+
+~
+~
+
+nn
+
+**
+
+P4
+
+;
+
+1
+
+2
+
+3
+
+8
+
+9
+
+E
+
+X
+
+P1 P1 P2 P2 P3 P3
+
+4
+
+;
+9
+
+4
+
+5
+5
+
+6
+6
+
+7
+
+1
+
+2
+
+3
+
+E
+
+X
+
+P1 P1 P2 P2 P3 P3 P4
+
+7
+
+8
+
+P1
+P2
+P3
+P4
+
+9
+
+: 01 - 07
+: 01 - 07
+: 01 - 26
+: Parameter (See Table 3)
+
+CAT (Computer Aided Transceiver) Operation
+P1
+
+P2
+
+01
+(MODE SSB)
+
+P3
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+
+02
+(MODE AM)
+
+01
+(RADIO SETTING)
+
+03
+(MODE FM)
+
+17
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+
+Table 3 (MENU Chart)
+Function
+P4
+AF TREBLE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF MIDDLE TONE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF BASS GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AGC FAST DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC MID DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC SLOW DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+LCUT FREQ
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+LCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+HCUT FREQ
+00: OFF 01: 700 Hz - 67: 4000 Hz (50 Hz steps)
+HCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+USB OUT LEVEL
+000 - 100
+TX BPF SEL
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600 (Hz)
+MOD SOURCE
+0: MIC 1: USB 2: Bluetooth 3: AUTO
+USB MOD GAIN
+000 - 100
+RPTT SELECT
+0: OFF 1: RTS 2: DTR
+00: 300
+01: 400
+02: 600
+03: 850
+04: 1100 05: 1200 06: 1500 07: 1650
+NAR WIDTH
+08: 1800 09: 1950 10: 2100 11: 2250 12: 2400 13: 2450 14: 2500 15: 2600
+16: 2700 17: 2800 18: 2900 19: 3000 20: 3200 21: 3500 22: 4000 (Hz)
+CW AUTO MODE
+0: OFF 1: 50MHz 2: ON
+AF TREBLE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF MIDDLE TONE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF BASS GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AGC FAST DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC MID DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC SLOW DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+LCUT FREQ
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+LCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+HCUT FREQ
+00: OFF 01: 700 Hz - 67: 4000 Hz (50 Hz steps)
+HCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+USB OUT LEVEL
+000 - 100
+TX BPF SEL
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600
+MOD SOURCE
+0: MIC 1: USB 2: Bluetooth 3: AUTO
+USB MOD GAIN
+000 - 100
+RPTT SELECT
+0: OFF 1: RTS 2: DTR
+AF TREBLE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF MIDDLE TONE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF BASS GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AGC FAST DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC MID DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC SLOW DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+LCUT FREQ
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+LCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+HCUT FREQ
+00: OFF 01: 700 Hz - 67: 4000 Hz (50 Hz steps)
+HCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+USB OUT LEVEL
+000 - 100
+MOD SOURCE
+0: MIC 1: USB 2: Bluetooth 3: AUTO
+USB MOD GAIN
+000 - 100
+RPTT SELECT
+0: OFF 1: RTS 2: DTR
+RPT SHIFT
+0: - 1: SIMPLEX 2: + 3: ARS
+RPT SHIFT(28MHz)
+0 - 1000 kHz (P4 = 0000 - 1000, 10 kHz/step)
+RPT SHIFT(50MHz)
+0 - 4000 kHz (P4 = 0000 - 4000, 10 kHz/step)
+RPT SHIFT(144MHz)
+0 - 100MHz (P4 = 0000 - 0100, 50 kHz/step)
+RPT SHIFT(430MHz)
+0 - 100MHz (P4 = 0000 - 0100, 50 kHz/step)
+SQL TYPE
+0: OFF 1: ENC 2: TSQ 3: DCS 4: PR FREQ 5: REV TONE
+TONE FREQ
+00: 67.0 - 49: 254.1Hz
+DCS CODE
+00: 023 - 103: 754
+DCS RX REVERS
+0: NORMAL 1: REVERS 2: BOTH
+DCS TX REVERS
+0: NORMAL 1: REVERS
+PR FREQ
+300 - 3000 Hz (P4= 0300 - 3000, 100 Hz/step)
+DTMF DELAY
+0: 50 1: 250 2: 450 3: 750 4: 1000 (ms)
+DTMF SPEED
+0: 50 1: 100 (ms)
+DTMF MEMORY1
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY2
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY3
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY4
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY5
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY6
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY7
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY8
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY9
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+DTMF MEMORY10
+0 - 9, A, B, C, D, *, #, - (space) (Up to 16 characters)
+
+10
+
+Digits
+3
+3
+3
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+2
+1
+3
+3
+3
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+3
+3
+3
+4
+4
+4
+2
+1
+2
+1
+3
+1
+3
+1
+1
+4
+4
+4
+4
+1
+2
+2
+1
+1
+4
+1
+1
+16
+16
+16
+16
+16
+16
+16
+16
+16
+16
+
+CAT (Computer Aided Transceiver) Operation
+P1
+
+P2
+
+04
+(MODE DATA)
+
+P3
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+
+01
+(RADIO SETTING)
+
+05
+(MODE RTTY)
+
+17
+18
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+
+06
+(DIGITAL)
+
+01
+(MODE CW)
+
+14
+15
+16
+01
+02
+03
+04
+05
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+
+02
+(CW SETTING)
+
+02
+(KEYER)
+
+14
+15
+16
+17
+18
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+
+Table 3 (MENU Chart)
+Function
+P4
+AF TREBLE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF MIDDLE TONE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF BASS GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AGC FAST DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC MID DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC SLOW DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+LCUT FREQ
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+LCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+HCUT FREQ
+00: OFF 01: 700 Hz - 67: 4000 Hz (50 Hz steps)
+HCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+USB OUT LEVEL
+000 - 100
+TX BPF SEL
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600
+MOD SOURCE
+0: MIC 1: USB 2: Bluetooth 3: AUTO
+USB MOD GAIN
+000 - 100
+RPTT SELECT
+0: OFF 1: RTS 2: DTR
+00: 50
+01:100
+02: 150
+03: 200
+04: 250
+05: 300
+06: 350
+07: 400
+NAR WIDTH
+09: 500
+10: 600
+11: 800
+12: 1200 13: 1400 14: 1700 15: 2000
+08: 450
+16: 2400 17: 3000 18: 3200 19: 3500 20: 4000 (Hz)
+PSK TONE
+0: 1000Hz 1: 1500Hz 2: 2000Hz
+DATA SHIFT (SSB)
+0 - 3000 Hz (P4 = 0000 - 3000, 10 Hz steps)
+AF TREBLE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF MIDDLE TONE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF BASS GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AGC FAST DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC MID DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC SLOW DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+LCUT FREQ
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+LCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+HCUT FREQ
+00: OFF 01: 700 Hz - 67: 4000 Hz (50 Hz steps)
+HCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+USB OUT LEVEL
+000 - 100
+RPTT SELECT
+0: OFF 1: RTS 2: DTR
+00: 50
+01:100
+02: 150
+03: 200
+04: 250
+05: 300
+06: 350
+07: 400
+NAR WIDTH
+09: 500
+10: 600
+11: 800
+12: 1200 13: 1400 14: 1700 15: 2000
+08: 450
+16: 2400 17: 3000 18: 3200 19: 3500 20: 4000 (Hz)
+MARK FREQUENCY
+0: 1275 Hz 1: 2125 Hz
+SHIFT FREQUENCY
+0: 170 Hz 1: 200 Hz 2: 425 Hz 3: 850 Hz
+POLARITY-TX
+0: NOR 1: REV
+DIGITAL POPUP
+00: OFF 01: 2 sec - 59: 60sec 60: CONTINUE
+LOCATION SERVICE
+0: OFF 1: ON
+STANDBY BEEP
+0: OFF 1: ON
+DP-ID LIST
+ꟷ
+RADIO ID
+ꟷ
+AF TREBLE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF MIDDLE TONE GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AF BASS GAIN
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+AGC FAST DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC MID DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+AGC SLOW DELAY
+20 - 4000 msec (P4= 0020 - 4000, 20 msec/step)
+LCUT FREQ
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+LCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+HCUT FREQ
+00: OFF 01: 700 Hz - 67: 4000 Hz (50 Hz steps)
+HCUT SLOPE
+0: 6 dB/oct 1: 18 dB/oct
+USB OUT LEVEL
+000 - 100
+RPTT SELECT
+0: OFF 1: RTS 2: DTR
+00: 50
+01:100
+02: 150
+03: 200
+04: 250
+05: 300
+06: 350
+07: 400
+NAR WIDTH
+09: 500
+10: 600
+11: 800
+12: 1200 13: 1400 14: 1700 15: 2000
+08: 450
+16: 2400 17: 3000 18: 3200 19: 3500 20: 4000 (Hz)
+PC KEYING
+0: OFF 1: RTS 2: DTR
+CW BK-IN TYPE
+0: SEMI 1: FULL
+CW FREQ DISPLAY
+0: DIRECT FREQ 1: PITCH OFFSET
+QSK DELAY TIME
+0: 15 msec 1: 20 msec 2: 25 mesc 3: 30 msec
+CW INDICATOR
+0: OFF 1: ON
+KEYER TYPE
+0: OFF 1: BUG 2: ELEKEY-A 3: ELEKEY-B 4: ELEKEY-Y 5: ACS
+KEYER DOT/DASH
+0: NOR 1: REV
+CW WEIGHT
+2.5 - 4.5 (P4 = 25 - 45)
+NUMBER STYLE
+0: 1290 1: AUNO 2: AUNT 3: A2NO 4: A2NT 5: 12NO 6: 12NT
+CONTEST NUMBER
+0001 - 9999
+CW MEMORY 1
+0: TEXT 1: MESSAGE
+CW MEMORY 2
+0: TEXT 1: MESSAGE
+CW MEMORY 3
+0: TEXT 1: MESSAGE
+CW MEMORY 4
+0: TEXT 1: MESSAGE
+CW MEMORY 5
+0: TEXT 1: MESSAGE
+REPEAT INTERVAL
+1 - 60 sec (P4 = 01 - 60)
+
+11
+
+Digits
+3
+3
+3
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+2
+1
+4
+3
+3
+3
+4
+4
+4
+2
+1
+2
+1
+3
+1
+2
+1
+1
+1
+2
+1
+1
+3
+3
+3
+4
+4
+4
+2
+1
+2
+1
+3
+1
+2
+1
+1
+1
+1
+1
+1
+1
+2
+1
+4
+1
+1
+1
+1
+1
+2
+
+CAT (Computer Aided Transceiver) Operation
+P1
+
+P2
+
+01
+(GENERAL)
+
+02
+(BAND-SCAN)
+
+03
+(RX-DSP)
+
+03
+(OPERATION SETTING)
+
+04
+(TX AUDIO)
+
+05
+(TX GENERAL)
+
+06
+(KEY/DIAL)
+
+P3
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+
+Table 3 (MENU Chart)
+Function
+P4
+BEEP LEVEL
+000 - 100
+RF/SQL VR
+0: RF 1: SQL 2:SQL (FM MODE only)
+TUN/LIN PORT SELECT
+0: EXT-TUNER 1: LINEAR 2: CAT-3 3: GPO
+TUNER SELECT
+0: INT 1: INT (FAST) 2: EXT 3: ATAS
+CAT-1 RATE
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps
+CAT-1 TIME OUT TIMER
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+CAT-1 CAT-3 STOP BIT
+0: 1 bit 1: 2 bit
+CAT-2 RATE
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps
+CAT-2 TIME OUT TIMER
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+CAT-3 RATE
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps
+CAT-3 TIME OUT TIMER
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+TX TIME OUT TIMER
+00: OFF 01: 01 min - 30: 30 min (P4= 00 - 30)
+REF FREQ ADJ
+-25 - +00 (or -00) - +25 (P4= -25 - +00 or -00 - +25)
+CHARGE CONTROL
+0: OFF 1: ON
+SUB BAND MUTE
+0: OFF 1: ON
+SPEAKER SELECT
+0: Auto 1: INT 2: BOTH
+
+17
+
+DITHER
+
+0: OFF
+
+01
+02
+03
+04
+01
+02
+03
+04
+05
+06
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+
+QMB CH
+BAND STACK
+BAND EDGE
+SCAN RESUME
+IF NOTCH WIDTH
+NB REJECTION
+NB WIDTH
+APF WIDTH
+CONTOUR LEVEL
+CONTOUR WIDTH
+AMC RELEASE TIME
+PRMTRC EQ1 FREQ
+PRMTRC EQ1 LEVEL
+PRMTRC EQ1 BWTH
+PRMTRC EQ2 FREQ
+PRMTRC EQ2 LEVEL
+PRMTRC EQ2 BWTH
+PRMTRC EQ3 FREQ
+PRMTRC EQ3 LEVEL
+PRMTRC EQ3 BWTH
+P PRMTRC EQ1 FREQ
+P PRMTRC EQ1 LEVEL
+P PRMTRC EQ1 BWTH
+P PRMTRC EQ2 FREQ
+P PRMTRC EQ2 LEVEL
+P PRMTRC EQ2 BWTH
+P PRMTRC EQ3 FREQ
+P PRMTRC EQ3 LEVEL
+P PRMTRC EQ3 BWTH
+MAX POWER (BAT)
+QRP MODE
+HF MAX POWER
+50M MAX POWER
+70M MAX POWER
+144M MAX POWER
+430M MAX POWER
+AM HF/50 MAX POWER
+AM V/U MAX POWER
+VOX SELECT
+EMERGENCY FREQ TX
+TX INHIBIT
+METER DETECTOR
+SSB/CW DIAL STEP
+RTTY/PSK DIAL STEP
+FM DIAL STEP
+CH STEP
+AM CH STEP
+FM CH STEP
+MAIN STEPS PER REV.
+MIC P1
+MIC P2
+MIC P3
+MIC P4
+MIC UP
+MIC DOWN
+MIC SCAN
+
+0: 5ch
+1: 10ch
+0: OFF 1: ON
+0: OFF 1: ON
+0: BUSY 1: HOLD 2: 1sec 3: 3sec 4: 5sec
+0: NARROW 1: WIDE
+0: LOW 1: MID 2: HIGH
+0: NARROW 1: MEDIUM 2: WIDE
+0: NARROW 1: MEDIUM 2: WIDE
+-40 - -00 (or +00) - +20 (P4 = -40 - -00 or +00 - +20)
+01 - 11
+0: FAST 1: MID 2: SLOW
+00 : OFF 01: 100 Hz - 07: 700 Hz (100 Hz steps)
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+00 - 10
+00: OFF 01: 700 Hz - 09: 1500 Hz (100 Hz steps)
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+00 - 10
+00 : OFF 01: 1500 Hz - 18: 3200 Hz (100 Hz steps)
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+00 - 10
+00 : OFF 01: 100 Hz - 07: 700 Hz (100 Hz steps)
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+00 - 10
+00: OFF 01: 700 Hz - 09: 1500 Hz (100 Hz steps)
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+00 - 10
+00 : OFF 01: 1500 Hz - 18: 3200 Hz (100 Hz steps)
+-20 - -00 (or +00) - +10 (P4 = -20 - -00 or +00 - +10)
+00 - 10
+005 - 060 (P4 = 005 - 060)
+0: OFF 1: ON
+005 - 010 (P4 = 005 - 010)
+005 - 010 (P4 = 005 - 010)
+005 - 060 (P4 = 005 - 060)
+005 - 100 (P4 = 005 - 100)
+005 - 100 (P4 = 005 - 100)
+005 - 025 (P4 = 005 - 025)
+005 - 025 (P4 = 005 - 025)
+0: MIC 1: USB 2: Bluetooth
+0: OFF 1: ON
+0: OFF 1: ON
+0: AVERAGE 1: PEAK
+0: 5 1: 10 2: 20 (Hz)
+0: 5 1: 10 2: 20 (Hz)
+0: 5 1: 6.25 2: 10 3: 12.5 4: 20 5: 25 (kHz) 6: Auto
+0: 1 1: 2.5 2: 5 3: 10 (kHz)
+0: 2.5 1: 5 2: 9 3: 10 4: 12.5 5: 25 (kHz)
+0: 5 1: 6.25 2: 10 3: 12.5 4: 20 5: 25 (kHz)
+0: 50 1: 100 2: 200
+
+12
+
+4:115200 bps
+4:115200 bps
+
+1: ON
+
+00:LOCK
+05:VOX/MOX
+10:NAR
+15:BAND UP
+20:AGC
+0: OFF
+
+4:115200 bps
+
+01:QMB
+06:MODE
+11:NB
+16:BAND DOWN
+
+1: ON
+
+Digits
+3
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+2
+3
+1
+1
+1
+1
+
+02:>/<
+07:ZIN/SPOT
+12:DNR
+17 ATT
+
+03:V/M
+08:SPLIT
+13:FREQ UP
+18:IPO
+
+1
+1
+1
+1
+1
+1
+1
+1
+3
+2
+1
+2
+3
+2
+2
+3
+2
+2
+3
+2
+2
+3
+2
+2
+3
+2
+2
+3
+2
+3
+1
+3
+3
+3
+3
+3
+3
+3
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+04:TUNER
+09:FINE
+14:FREQ DOWN
+19:DNF
+
+2
+
+1
+
+CAT (Computer Aided Transceiver) Operation
+P3
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+01
+02
+03
+04
+05
+06
+07
+08
+01
+02
+03
+04
+05
+06
+07
+01
+02
+03
+04
+05
+01
+02
+03
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+01
+02
+03
+04
+05
+06
+07
+
+Table 3 (MENU Chart)
+Function
+P4
+TUNER TYPE SEL ANT1
+0: INT 1: INT(FAST) 2: EXT 3: ATAS
+TUNER TYPE SEL ANT2
+0: INT 1: INT(FAST) 2: EXT 3: ATAS
+ANT2 OPERATION
+0: TRX 1: TX-ANT1, RX-ANT2 2: TRX-ANT1, RX-ANT2
+HF ANT SELECT
+0: ANT1 1: ANT2
+HF MAX POWER
+005 - 100 (P4 = 005 - 100)
+50M MAX POWER
+005 - 100 (P4 = 005 - 100)
+70M MAX POWER
+005 - 050 (P4 = 005 - 050)
+144M MAX POWER
+005 - 050 (P4 = 005 - 050)
+430M MAX POWER
+005 - 050 (P4 = 005 - 050)
+AM MAX POWER
+005 - 025 (P4 = 005 - 025)
+AM V/U MAX POWER
+005 - 013 (P4 = 005 - 013)
+GPS
+0: OFF 1: ON
+GPS PINNING
+0: OFF 1: ON
+GPS BAUDRATE
+0: 4800 1: 9600 2: 19200 3: 38400 4: 115200 (bps)
+BLUETOOTH
+ꟷ
+MY CALL
+Up to 10 characters
+MY CALL TIME
+0: OFF 1: 1 2: 2 3: 3 4: 4 5: 5 (sec)
+POP-UP TIME
+0: FAST 1: MID 2: SLOW
+SCREEN SAVER
+0: OFF 1: 1 2: 2 3: 5 4: 15 5: 30 6: 60 (min)
+SCREEN SAVER(BAT)
+0: OFF 1: 1 2: 2 3: 5 4: 15 5: 30 6: 60 (min)
+SAVER TYPE
+0: Logo 1: DIMMER 2: DISP OFF
+AUTO POWER OFF
+0: OFF 1: 0.5 - 24: 12 (hour)
+LED DIMMER
+00 - 20
+POSITION UNIT
+0: dd°MM.mm’. 1: dd°mm’ss’’
+DISTANCE UNIT
+0: km 1: mile
+SPEED UNIT
+0: km/h 1: knot 3: mph
+ALTITUDE UNIT
+0: m 1: ft
+TEMP UNIT
+0: °C 1: °F
+RAIN UNIT
+0: mm 1: INCH
+WIND UNIT
+0: m/s 2: mph
+RBW
+0: HIGH 1: MID 2: LOW
+SCOPE CTR
+0: FILTER 1: CARRIER
+2D DISP SENSITIVITY
+0: NORMAL 1: HI
+3DSS DISP SENSITIVITY
+0: NORMAL 1: HI
+AVERAGE
+0: OFF 1: 2 2: 4 3: 8
+VMI COLOR VFO
+0: BLUE 1: GREEN 2: WHITE 3: NONE
+VMI COLOR MEMORY
+0: BLUE 1: GREEN 2: WHITE 3: NONE
+VMI COLOR CLAR
+0: RED 1: NONE
+TIME ZONE
+-12 (-120) - 0 - +14 (+140) (h) (0.5h steps)
+DAY
+ꟷ
+MONTH
+ꟷ
+YEAR
+ꟷ
+HOUR
+ꟷ
+MINUTE
+ꟷ
+GPS TIME SET
+0: AUTO 1: MANUAL
+MY POSITION
+0: GPS 1: MANUAL
+MY POSITION LATITUDE
+Latitude: x xx°xx’ xx”
+MY POSITION LONGITUDE
+Longitude: x xxx°xx’ xx”
+MEM LIST LOAD
+ꟷ
+MEM LIST SAVE
+ꟷ
+MENU LOAD
+ꟷ
+MENU SAVE
+ꟷ
+INFORMATIONS
+ꟷ
+FIRMWARE UPDATE
+ꟷ
+FORMAT
+ꟷ
+
+03
+(SOFT VERSION)
+
+01
+
+SOFT VERSION
+
+ꟷ
+
+-
+
+04
+(CALIBRATION)
+
+01
+
+CALIBRATION
+
+ꟷ
+
+-
+
+05
+(RESET)
+
+01
+02
+03
+
+MEMORY CLEAR
+MENU CLEAR
+ALL RESET
+
+ꟷ
+ꟷ
+ꟷ
+
+-
+
+05
+(CERTIFICATION)
+
+04
+
+CERTIFICATION
+
+ꟷ
+
+-
+
+P1
+
+P2
+
+03
+(OPERATION SETTING)
+
+07
+(OPTION)
+
+01
+(DISPLAY)
+
+04
+(DISPLAY SETTING)
+
+02
+(UNIT)
+
+03
+(SCOPE)
+
+04
+(VFO IND COLOR)
+
+01
+(DATE&TIME)
+
+01
+(MY POSITION)
+
+05
+(EXTENSION SETTING)
+
+02
+(SD CARD)
+
+13
+
+Digits
+1
+1
+1
+1
+3
+3
+3
+3
+3
+3
+3
+1
+1
+1
+10
+1
+1
+1
+1
+1
+1
+2
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+4
+1
+1
+-
+
+CAT (Computer Aided Transceiver) Operation
+Table 3 (MENU Chart)
+P1
+
+P2
+
+01
+(GENERAL)
+
+06
+(APRS SETTING)
+
+02
+(MSG TEMPLATE)
+
+03
+(MY SYMBOL)
+
+04
+(DIGI PATH)
+
+01
+(BEACON SET.)
+
+02
+(AUTO BEACON)
+
+07
+(APRS BEACON)
+03
+(SmartBeac.)
+
+04
+(BEACON TEXT)
+
+01
+(LIST SETTING)
+
+02
+(STATION LIST)
+
+03
+(POPUP)
+08
+(APRS FILTER)
+04
+(RINGER)
+
+06
+(MSG FIL.)
+
+P3
+01
+02
+03
+
+Function
+MODEM SELECT
+MODEM TYPE
+APRS AF MUTE
+
+0: OFF 1: AUTO 2: MAIN
+0: 1200bps 1: 9600bps
+0: OFF 1: ON
+
+P4
+
+04
+
+APRS TX DELAY
+
+0: 100ms
+
+05
+09
+01
+02
+03
+04
+05
+06
+07
+08
+01
+02
+03
+04
+05
+
+CALLSIGN(APRS)
+APRS DESTINATION
+MESSAGE TEXT1
+MESSAGE TEXT2
+MESSAGE TEXT3
+MESSAGE TEXT4
+MESSAGE TEXT5
+MESSAGE TEXT6
+MESSAGE TEXT7
+MESSAGE TEXT8
+MY SYNBOL
+ICON1
+ICON2
+ICON3
+USER
+
+xxxxxx-xx
+APYX01 (fix)
+Up to 16 characters (ASCII)
+Up to 16 characters (ASCII)
+Up to 16 characters (ASCII)
+Up to 16 characters (ASCII)
+Up to 16 characters (ASCII)
+Up to 16 characters (ASCII)
+Up to 16 characters (ASCII)
+Up to 16 characters (ASCII)
+0: ICON1 1: ICON2 2: ICON3
+See Table 4 (see page 16)
+See Table 4 (see page 16)
+See Table 4 (see page 16)
+See Table 4 (see page 16)
+
+1: 200ms
+
+2: 300ms
+
+3: 400ms
+
+4: 500ms
+
+5: 750ms
+
+6: 1000ms
+
+3: USER
+
+8
+6
+16
+16
+16
+16
+16
+16
+16
+16
+1
+2
+2
+2
+2
+
+01
+
+PATH SELECT
+
+0: OFF
+
+BEACON TYPE
+INFO AMBIGUITY
+INFO SPEED/COURSE
+INFO ALTITUDE
+
+05
+
+POSITION COMMENT
+
+06
+
+EMERGENCY BEACON
+
+01
+
+INTERVAL TIME
+
+02
+03
+04
+05
+01
+02
+03
+04
+05
+06
+07
+01
+02
+03
+04
+05
+06
+07
+08
+
+PROPORTIONAL
+DECAY
+AUTO LOW SPEED
+BEACON DELAY
+SMART LOW SPEED
+SMART HIGH SPEED
+SMART SLOW RATE
+SMART FAST RATE
+SMART TURN ANGLE
+SMART TURN SLOPE
+SMART TURN TIME
+STATUS TEXT SELECT
+TX RATE
+BEACON FREQUENCY
+STATUS TEXT1
+STATUS TEXT2
+STATUS TEXT3
+STATUS TEXT4
+STATUS TEXT5
+
+0: OFF 1: AUTO 2: SMART
+0: OFF 1: 1dig 2: 2dig 3: 3dig 4: 4dig
+0: OFF 1: ON
+0: OFF 1: ON
+00: Off duty
+01: En Route 02: In Service 03: Returning 04: Committed
+05: Special
+06: Priority
+07: Custom 0
+08: Custom 1 09: Custom 2
+10: Custom 3 11: Custom 4 12: Custom 5
+13: Custom 6 14: EMERGENCY!
+0: OFF 1: ON
+0:30sec / 1:1min / 2:2min / 3:3min / 4:5min / 5:10min / 6:15min / 7:20min / 8:30min /
+9:60min
+0: OFF 1: ON
+0: OFF 1:ON
+01 - 99 (km/h or mph (1km or 1mph/Step)
+005 - 180 (sec)
+02 - 30 (km/h or mph (1km or 1mph/Step)
+03 - 90 (km/h or mph (1km or 1mph/Step)
+001 - 100 (min) (1min/step)
+010 - 180 (sec) (1sec/step)
+05 - 90 (degree) (1degree/step)
+001 - 255 (1/step)
+005 - 180 (sec) (1sec/step)
+0: OFF 1: TEXT1 2: TEXT2 3: TEXT3 4: TEXT4 5: TEXT5
+0: 1/1 1: 1/2 2: 1/3 3: 1/4 4: 1/5 5: 1/6 6: 1/7 7: 1/8
+0: None 1: FREQUENCY 2: FREQ & SQL & SHIFT
+Up to 60 characters (ASCII)
+Up to 60 characters (ASCII)
+Up to 60 characters (ASCII)
+Up to 60 characters (ASCII)
+Up to 60 characters (ASCII)
+
+1
+1
+2
+3
+2
+2
+3
+3
+2
+3
+3
+1
+1
+1
+60
+60
+60
+60
+60
+
+01
+
+STATION LIST SORT
+
+0: TIME
+
+1
+
+01
+02
+03
+04
+05
+06
+07
+08
+01
+02
+03
+01
+02
+03
+04
+07
+01
+02
+03
+04
+05
+06
+07
+08
+09
+
+Mic-E
+POSITION
+WEATHER
+OBJECT
+ITEM
+STATUS
+OTHER
+ALTNET
+BEACON
+MESSAGE
+MY PACKET
+TX BEACON
+RX BEACON
+TX MESSAGE
+RX MESSAGE
+MY PACKET
+MESSAGE GROUP1
+MESSAGE GROUP2
+MESSAGE GROUP3
+MESSAGE GROUP4
+MESSAGE GROUP5
+MESSAGE GROUP6
+BULLETIN 1
+BULLETIN 2
+BULLETIN 3
+
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: 3sec 2: 5sec
+0: OFF 1: 3sec 2: 5sec
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+0: OFF 1: ON
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+Up to 9 characters (ASCII)
+
+1: CALLSIGN
+
+2: WIDE1-1.WIDE2-1
+
+1
+
+01
+02
+03
+04
+
+14
+
+1: WIDE1-1
+
+Digits
+1
+1
+1
+
+3: SUB
+
+2: DISTANCE
+
+3: 10sec
+3: 10sec
+
+4: HOLD
+4: HOLD
+
+1
+1
+1
+1
+1
+2
+1
+1
+
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+9
+9
+9
+9
+9
+9
+9
+9
+9
+
+CAT (Computer Aided Transceiver) Operation
+Table 3 (MENU Chart)
+P1
+
+P2
+
+01
+(PRESET1)
+
+02
+(PRESET2)
+
+09
+(PRESET)
+
+03
+(PRESET3)
+
+04
+(PRESET4)
+
+05
+(PRESET5)
+
+P3
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+
+Function
+PRESET NAME
+CAT-1 RATE
+CAT-1 TIME OUT TIMER
+CAT-1 CAT-3 STOP BIT
+AGC FAST DELAY
+AGC MID DELAY
+AGC SLOW DELAY
+LCUT FREQ
+LCUT SLOPE
+HCUT FREQ
+HCUT SLOPE
+USB OUT LEVEL
+TX BPF SEL
+MOD SOURCE
+USB MOD GAIN
+RPTT SELECT
+PRESET NAME
+CAT-1 RATE
+CAT-1 TIME OUT TIMER
+CAT-1 CAT-3 STOP BIT
+AGC FAST DELAY
+AGC MID DELAY
+AGC SLOW DELAY
+LCUT FREQ
+LCUT SLOPE
+HCUT FREQ
+HCUT SLOPE
+USB OUT LEVEL
+TX BPF SEL
+MOD SOURCE
+USB MOD GAIN
+RPTT SELECT
+PRESET NAME
+CAT-1 RATE
+CAT-1 TIME OUT TIMER
+CAT-1 CAT-3 STOP BIT
+AGC FAST DELAY
+AGC MID DELAY
+AGC SLOW DELAY
+LCUT FREQ
+LCUT SLOPE
+HCUT FREQ
+HCUT SLOPE
+USB OUT LEVEL
+TX BPF SEL
+MOD SOURCE
+USB MOD GAIN
+RPTT SELECT
+PRESET NAME
+CAT-1 RATE
+CAT-1 TIME OUT TIMER
+CAT-1 CAT-3 STOP BIT
+AGC FAST DELAY
+AGC MID DELAY
+AGC SLOW DELAY
+LCUT FREQ
+LCUT SLOPE
+HCUT FREQ
+HCUT SLOPE
+USB OUT LEVEL
+TX BPF SEL
+MOD SOURCE
+USB MOD GAIN
+RPTT SELECT
+PRESET NAME
+CAT-1 RATE
+CAT-1 TIME OUT TIMER
+CAT-1 CAT-3 STOP BIT
+AGC FAST DELAY
+AGC MID DELAY
+AGC SLOW DELAY
+LCUT FREQ
+LCUT SLOPE
+HCUT FREQ
+HCUT SLOPE
+USB OUT LEVEL
+TX BPF SEL
+MOD SOURCE
+USB MOD GAIN
+RPTT SELECT
+
+P4
+Up to 12 characters
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps 4:115200 bps
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+0: 1 bit 1: 2 bit
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+00: OFF 01:700Hz - 67:4000Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+000 - 100
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600 Hz
+0: MIC 1: USB 2: REAR (RTTY/DATA Jack) 3: AUTO
+000 - 100
+0: OFF 1: RTS 2:DTR 3:DAKY (RTTY/DATA Jack)
+Up to 12 characters
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps 4:115200 bps
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+0: 1 bit 1: 2 bit
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+00: OFF 01:700Hz - 67:4000Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+000 - 100
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600 Hz
+0: MIC 1: USB 2: REAR (RTTY/DATA Jack) 3: AUTO
+000 - 100
+0: OFF 1: RTS 2:DTR 3:DAKY (RTTY/DATA Jack)
+Up to 12 characters
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps 4:115200 bps
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+0: 1 bit 1: 2 bit
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+00: OFF 01:700Hz - 67:4000Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+000 - 100
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600 Hz
+0: MIC 1: USB 2: REAR (RTTY/DATA Jack) 3: AUTO
+000 - 100
+0: OFF 1: RTS 2:DTR 3:DAKY (RTTY/DATA Jack)
+Up to 12 characters
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps 4:115200 bps
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+0: 1 bit 1: 2 bit
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+00: OFF 01:700Hz - 67:4000Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+000 - 100
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600 Hz
+0: MIC 1: USB 2: REAR (RTTY/DATA Jack) 3: AUTO
+000 - 100
+0: OFF 1: RTS 2:DTR 3:DAKY (RTTY/DATA Jack)
+Up to 12 characters
+0: 4800 bps 1: 9600 bps 2: 19200 bps 3: 38400 bps 4:115200 bps
+0: 10 msec 1: 100 msec 2: 1000 msec 3: 3000 msec
+0: 1 bit 1: 2 bit
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+20 - 4000 (P4 = 0020 - 4000, 20 msec steps)
+00: OFF 01: 100 Hz - 19: 1000 Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+00: OFF 01:700Hz - 67:4000Hz (50 Hz steps)
+0: 6dB/oct 1: 18dB/oct
+000 - 100
+0: 50 - 3050 1: 100 - 2900 2: 200 - 2800 3: 300 - 2700 4: 400 - 2600 Hz
+0: MIC 1: USB 2: REAR (RTTY/DATA Jack) 3: AUTO
+000 - 100
+0: OFF 1: RTS 2:DTR 3:DAKY (RTTY/DATA Jack)
+
+15
+
+Digits
+12
+1
+1
+1
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+12
+1
+1
+1
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+12
+1
+1
+1
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+12
+1
+1
+1
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+12
+1
+1
+1
+4
+4
+4
+2
+1
+2
+1
+3
+1
+1
+3
+1
+
+CAT (Computer Aided Transceiver) Operation
+Table 3 (MENU Chart)
+P1
+
+P2
+
+11
+(BLUETOOTH)
+
+P4
+/0
+/'
+//#
+/&
+/.
+/:
+/;
+/[
+/\
+/^
+
+01
+(Bluetooth)
+
+ICON
+Circle
+Small Aircraft
+House QTH (VHF)
+DIGI
+HF Gateway
+X
+Fire
+Campground
+Human/Person
+Triangle(DF)
+Large Aircraft
+
+FA
+Set
+Read
+Answer
+
+FB
+Set
+Read
+Answer
+
+FN
+Set
+Read
+Answer
+
+FR
+Set
+Read
+Answer
+
+FT
+Set
+Read
+Answer
+
+P3
+01
+02
+03
+04
+
+P4
+/_
+/<
+/=
+/>
+/a
+/b
+/C
+/E
+/f
+/g
+/I
+
+Function
+
+P4
+
+ICON
+Weather Station
+Motorcycle
+Railroad Engine
+Car
+Ambulance
+Bycycle
+Canoe
+Eyeball
+Fire Truck
+Glider
+TCP/IP
+
+Table 4 (MY SYMBOL Chart)
+
+P4
+/j
+/K
+/k
+/m
+/O
+/P
+/R
+/r
+/s
+/T
+/U
+
+ICON
+Jeep
+School
+School
+Mic-E Repeater
+Balloon
+Police
+REC.Vehicle
+REC.Vehicle
+Ship(powerboat)
+SSTV
+Bus
+
+P4
+/u
+/V
+/v
+/W
+/X
+/Y
+/y
+\0
+\\#
+\&
+
+ICON
+Bus
+ATV
+ATV
+NWS Site
+Helicopter
+Yacht(sailboat)
+Yacht(sailboat)
+Circle
+House (HF)
+Overlay DIGI
+Overlay Gate
+
+P4
+\.
+\;
+\^
+\_
+\=
+\>
+\A
+\K
+\m
+\n
+\s
+
+FREQUENCY VFO MAIN-SIDE
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+11
+
+12
+
+F
+
+A
+
+P1 P1 P1 P1 P1 P1 P1 P1 P1
+
+;
+
+1
+
+2
+
+3
+
+F
+
+A
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+11
+
+12
+
+F
+
+A
+
+P1 P1 P1 P1 P1 P1 P1 P1 P1
+
+;
+
+P1 000030000 - 470000000 (Hz)
+
+FREQUENCY VFO SUB-SIDE
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+11
+
+12
+
+F
+
+B
+
+P1 P1 P1 P1 P1 P1 P1 P1 P1
+
+;
+
+1
+
+2
+
+3
+
+F
+
+B
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+12
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+11
+
+12
+
+F
+
+B
+
+P1 P1 P1 P1 P1 P1 P1 P1 P1
+
+;
+
+P1 000030000 - 470000000 (Hz)
+
+FINE TUNING
+1
+
+2
+
+3
+
+4
+
+F
+
+N
+
+P1
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+F
+
+N
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+F
+
+N
+
+P1
+
+;
+
+P1 0: “OFF”
+1: Fine Tuning “ON”
+2: Fast Tuning “ON”
+
+FUNCTION RX
+1
+
+2
+
+3
+
+4
+
+5
+
+F
+
+R
+
+P1 P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+F
+
+R
+
+;
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+F
+
+R
+
+P1 P1
+
+;
+
+P1 00: Dual receive
+01: Single receive
+
+FUNCTION TX
+1
+
+2
+
+3
+
+4
+
+F
+
+T
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+F
+
+T
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+F
+
+T
+
+P1
+
+;
+
+Digits
+1
+1
+1
+
+0: OFF 1: ON
+ꟷ
+ꟷ
+0: AUTO 1: FIX
+
+Bluetooth
+Device Name : Status
+DEVICE LIST
+AUDIO
+
+P1 0: MAIN-side Transmitter
+1: SUB-side Transmitter
+
+16
+
+ICON
+Ambiguous
+Park/Picnic Area
+Aircraft
+WX Site
+APRStt
+Overlayed Car
+APRStt
+Kenwood HT
+Value Signpost
+Overlay Triangle
+Overlayed Ship
+
+P4
+\u
+\v
+\W
+\x
+\Y
+E0
+I0
+KY
+W0
+YY
+
+ICON
+Overlayed Truck
+Overlayed Van
+NWS Site
+Obstruction
+Radios & Devices
+EchoLink
+IRLP
+Kenwood Radios
+WIRES
+Yaesu Radios
+
+ꟷ
+
+ꟷ
+
+CAT (Computer Aided Transceiver) Operation
+GP
+Set
+
+Read
+
+Answer
+
+GT
+Set
+Read
+Answer
+
+ID
+Set
+Read
+Answer
+
+IF
+Set
+
+Read
+
+Answer
+
+GP OUT
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+G
+
+P
+
+P1 P2 P3 P4
+
+;
+
+1
+
+2
+
+3
+
+G
+
+P
+
+;
+
+1
+
+2
+
+3
+
+G
+
+P
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 P2 P3 P4
+
+;
+
+Read
+Answer
+
+KM
+Set
+Read
+Answer
+
+GP OUT A
+
+GP OUT B
+
+GND
+GP OUT D
+
+GP OUT C
+
+Set to “GPO” in the setting menu [OPERATION SETTING] → [GENERAL] →
+→ [TUN/LIN PORT SELECT].
+(Factory setting: “OPTION”)
+
+1
+
+2
+
+3
+
+4
+
+5
+
+G
+
+T
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+G
+
+T
+
+P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+G
+
+T
+
+P1 P3
+
+;
+
+P1 0: MAIN-side
+P3 0: AGC “OFF”
+1: SUB-side		
+1: AGC “FAST”
+P2 0: AGC “OFF”		
+2: AGC “MID”
+1: AGC “FAST”		
+3: AGC “SLOW”
+2: AGC “MID”		
+4: AGC “AUTO - FAST”
+3: AGC “SLOW”		
+5: AGC “AUTO - MID”
+4: AGC “AUTO”		
+6: AGC “AUTO - SLOW”
+
+IDENTIFICATION
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+I
+
+D
+
+;
+4
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+I
+
+D
+
+P1 P1 P1 P1
+
+;
+
+P1 0840 (Fixed)
+
+INFORMATION VFO MAIN-SIDE
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+I
+
+F
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+I
+
+F
+
+P1 P1 P1 P1 P1 P2
+
+11
+
+12
+
+13
+
+14
+
+15
+
+16
+
+17
+
+18
+
+P2 P2 P2 P2 P2 P2 P3 P3
+22
+
+23
+
+24
+
+25
+
+26
+
+27
+
+28
+
+P3 P4 P5 P6 P7 P8 P9 P9
+
+Set
+
++13.8V
+
+AGC FUNCTION
+
+21
+
+IS
+
+P1 0: GP OUT A “LOW”
+1: GP OUT A “HIGH”
+P2 0: GP OUT B “LOW”
+1: GP OUT B “HIGH”
+P3 0: GP OUT C “LOW”
+1: GP OUT C “HIGH”
+P4 0: GP OUT D “LOW”
+1: GP OUT D “HIGH”
+*5V CMOS Level, Max. 3 mA
+
+P1 00000: VFO or MT or QMB (5 Bytes)
+00001 - 00999: (Memory Channel)
+P-01L - P-50U: (PMS)
+50001 - 50020: (5MHz BAND)
+EMGCH: (EMERGENCY CH)
+9
+10
+P2 VFO Frequency (Hz) (9 Bytes)
+P3 Clarifier Direction +: Plus Shift, -: Minus Shift (1 Bytes)
+Clarifier Offset: 0000 - 9990 (Hz) (4 Bytes)
+1: RX CLAR “ON”
+9
+10 P4 0: RX CLAR “OFF”
+P5 0: TX CLAR “OFF”
+1: TX CLAR “ON”
+MODE 0:1: LSB
+2: USB
+3: CW-U
+4: FM
+P2 P2 P6
+		
+5: AM
+6: RTTY-L
+7: CW-L
+8: DATA-L
+9: RTTY-U
+		
+A: DATA-FM
+B: FM-N
+C: DATA-U
+D: AM-N
+E: PSK
+19
+20
+		
+F: DATA-FM-N G: H: C4FM-DN I: C4FM-VW J: P7 0: VFO 1: Memory Channel 2: Memory Tune
+3: Quick Memory Bank (QMB)
+P3 P3
+4: 5: PMS
+P8 0: OFF 1: CTCSS ENC/DEC 2: CTCSS ENC 3: DCS 4: PR FREQ
+29
+30
+5: REV TONE
+P9 00: (Fixed)
+P10 ; P10 0: Simplex 1: Plus Shift 2: Minus Shift
+9
+
+10
+
+IF-SHIFT
+1
+
+2
+
+3
+
+9
+
+10
+
+I
+
+S
+
+P1 P2 P3 P4 P4 P4 P4
+
+4
+
+;
+
+1
+
+2
+
+3
+
+4
+
+I
+
+S
+
+P1
+
+;
+4
+
+5
+
+6
+
+7
+
+8
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+1
+
+2
+
+3
+
+9
+
+10
+
+I
+
+S
+
+P1 P2 P3 P4 P4 P4 P4
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: (Fixed)
+P3 + / P4 0000 - 1200 Hz (20 Hz steps)
+
+KEYING MEMORY
+1
+
+2
+
+3
+
+n
+
+M
+
+P1 P2 P2 P2 P2
+
+~
+~
+
+n-1
+
+K
+
+P2
+
+;
+
+4
+
+1
+
+2
+
+3
+
+4
+
+K
+
+M
+
+P1
+
+;
+4
+
+5
+
+6
+
+7
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+~
+~
+
+n-1
+
+n
+
+P2
+
+;
+
+1
+
+2
+
+3
+
+K
+
+M
+
+P1 P2 P2 P2 P2
+
+P1 1 - 5 : Keyer Memory Channel Number
+P2 Message Characters (up to 50 characters)
+
+17
+
+CAT (Computer Aided Transceiver) Operation
+KP
+Set
+Read
+Answer
+
+KR
+Set
+Read
+Answer
+
+KS
+Set
+Read
+Answer
+
+KY
+Set
+Read
+Answer
+
+LK
+Set
+Read
+Answer
+
+LM
+Set
+
+Read
+
+Answer
+
+MA
+Set
+Read
+Answer
+
+KEY PITCH FREQUENCY
+1
+
+2
+
+3
+
+4
+
+5
+
+K
+
+P
+
+P1 P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+K
+
+P
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+K
+
+P
+
+P1 P1
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 00: 300 Hz - 75: 1050 Hz (10Hz steps)
+
+KEYER
+1
+
+2
+
+3
+
+4
+
+K
+
+R
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+K
+
+R
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+K
+
+R
+
+P1
+
+;
+
+P1 0: CW KEYER “OFF”
+1: CW KEYER “ON”
+
+KEYER SPEED
+1
+
+2
+
+3
+
+5
+
+6
+
+K
+
+S
+
+P1 P1 P1
+
+4
+
+;
+
+1
+
+2
+
+3
+
+K
+
+S
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+5
+
+6
+
+K
+
+S
+
+P1 P1 P1
+
+;
+
+P1 004 - 060 (WPM)
+
+CW KEYING MEMORY PLAY
+1
+
+2
+
+3
+
+4
+
+5
+
+K
+
+Y
+
+P1 P2
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 0: CW TEXT Memory 1: CW MESSAGE Memory
+P2 0: STOP
+1: CW TEXT/MESSAGE Memory “1” Playback
+2: CW TEXT/MESSAGE Memory “2” Playback
+3: CW TEXT/MESSAGE Memory “3” Playback
+4: CW TEXT/MESSAGE Memory “4” Playback
+5: CW TEXT/MESSAGE Memory “5” Playback
+
+LOCK
+1
+
+2
+
+3
+
+4
+
+L
+
+K
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+L
+
+K
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+L
+
+K
+
+P1
+
+;
+
+P1 0: Lock “OFF”
+1: Lock “ON”
+
+LOAD MESSAGE
+1
+
+2
+
+3
+
+4
+
+5
+
+L
+
+M
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+L
+
+M
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+L
+
+M
+
+P1 P2
+
+;
+
+P1 0: MESSAGE (DVS) 1: RECORD
+P2 P1=0 (MESSAGE)
+0: Play Stop/ Recording Stop
+1: Select CH “1”
+2: Select CH “2”
+3: Select CH “3”
+4: Select CH “4”
+5: Select CH “5”
+P1=1 (RECORD)
+0: Recording Stop
+1: Recording Start
+
+MEMORY CHANNEL to VFO MAIN-SIDE
+1
+
+2
+
+3
+
+M
+
+A
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+18
+
+CAT (Computer Aided Transceiver) Operation
+MB
+Set
+Read
+Answer
+
+MC
+Set
+Read
+Answer
+
+MD
+Set
+Read
+Answer
+
+MG
+Set
+Read
+Answer
+
+ML
+Set
+Read
+Answer
+
+MR
+
+MEMORY CHANNEL to VFO SUB-SIDE
+1
+
+2
+
+3
+
+M
+
+B
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+10
+
+MEMORY CHANNEL
+1
+
+2
+
+3
+
+8
+
+9
+
+M
+
+C
+
+P1 P2 P2 P2 P2 P2
+
+4
+
+5
+
+;
+
+1
+
+2
+
+3
+
+M
+
+C
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+10
+
+1
+
+2
+
+3
+
+8
+
+9
+
+M
+
+C
+
+P1 P2 P2 P2 P2 P2
+
+;
+
+OPERATING MODE
+1
+
+2
+
+3
+
+4
+
+5
+
+M
+
+D
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+M
+
+D
+
+P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 0: MAIN-side
+1: SUB-side
+P2 MODE 0:		
+5: AM
+		
+A: DATA-FM
+		
+F: DATA-FM-N
+
+7
+
+8
+
+9
+
+10
+
+P1 000 - 100
+
+1
+
+2
+
+3
+
+4
+
+5
+
+M
+
+D
+
+P1 P2
+
+;
+
+Answer
+
+1: LSB
+6: RTTY-L
+B: FM-N
+G: -
+
+2: USB
+7: CW-L
+C: DATA-U
+H: C4FM-DN
+
+3: CW-U
+8: DATA-L
+D: AM-N
+I: C4FM-VW
+
+4: FM
+9: RTTY-U
+E: PSK
+J: -
+
+MIC GAIN
+1
+
+2
+
+3
+
+5
+
+6
+
+M
+
+G
+
+P1 P1 P1
+
+4
+
+;
+
+1
+
+2
+
+3
+
+M
+
+G
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+7
+
+8
+
+9
+
+10
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+5
+
+6
+
+M
+
+G
+
+P1 P1 P1
+
+;
+
+MONITOR LEVEL
+1
+
+2
+
+3
+
+6
+
+7
+
+M
+
+L
+
+P1 P2 P2 P2
+
+4
+
+;
+
+1
+
+2
+
+3
+
+4
+
+M
+
+L
+
+P1
+
+;
+4
+
+5
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+M
+
+L
+
+P1 P2 P2 P2
+
+;
+
+P1 0: MONI “ON/OFF”
+1: MONI Level
+P2 P1=0
+000: MONI “OFF”
+001: MONI “ON”
+P1=1
+000 - 100
+
+MEMORY CHANNEL READ
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+M
+
+R
+
+P0 P0 P0 P0 P0
+
+;
+
+1
+
+2
+
+3
+
+8
+
+M
+
+R
+
+P1 P1 P1 P1 P1 P2
+
+11
+
+12
+
+13
+
+Set
+
+Read
+
+P1 0: MAIN-side
+1: SUB-side
+P2 00001 - 00099: (Memory Channel)
+P-01L - P-50U: (PMS)
+50000 - 50020: (5MHz BAND)
+EMGCH: (EMERGENCY CH)
+
+4
+
+14
+
+5
+
+15
+
+6
+
+16
+
+7
+
+17
+
+18
+
+P2 P2 P2 P2 P2 P2 P3 P3
+21
+
+22
+
+23
+
+24
+
+25
+
+26
+
+27
+
+28
+
+P3 P4 P5 P6 P7 P8 P9 P9
+
+P0 00000: VFO or MT or QMB (5 Bytes)
+00001 - 00999: (Memory Channel)
+P-01L - P-50U: (PMS)
+50001 - 50020: (5MHz BAND)
+EMGCH: (EMERGENCY CH)
+P1 00000: VFO or MT or QMB (5 Bytes)
+9
+10
+00001 - 00999: (Memory Channel)
+P-01L - P-50U: (PMS)
+50001 - 50020: (5MHz BAND)
+EMGCH: (EMERGENCY CH)
+9
+10 P2 VFO Frequency (Hz) (9 Bytes)
+P3 Clarifier Direction +: Plus Shift, -: Minus Shift (1 Bytes)
+Clarifier Offset: 0000 - 9990 (Hz) (4 Bytes)
+1: RX CLAR “ON”
+P2 P2 P4 0: RX CLAR “OFF”
+P5 0: TX CLAR “OFF”
+1: TX CLAR “ON”
+P6 MODE 0:1: LSB
+2: USB
+3: CW-U
+4: FM
+19
+20 		
+5: AM
+6: RTTY-L
+7: CW-L
+8: DATA-L
+9: RTTY-U
+		
+A: DATA-FM
+B: FM-N
+C: DATA-U
+D: AM-N
+E: PSK
+F: DATA-FM-N G: H: C4FM-DN I: C4FM-VW J: P3 P3 		
+P7 0: VFO 1: Memory Channel 2: Memory Tune
+3: Quick Memory Bank (QMB)
+4: 5: PMS
+29
+30 P8 0: OFF
+1: CTCSS ENC/DEC 2: CTCSS ENC 3: DCS 4: PR FREQ
+5: REV TONE
+P9 00: (Fixed)
+P10 ; P10 0: Simplex 1: Plus Shift 2: Minus Shift
+9
+
+10
+
+19
+
+CAT (Computer Aided Transceiver) Operation
+MS
+Set
+Read
+Answer
+
+MT
+Set
+
+METER SW
+1
+
+2
+
+3
+
+4
+
+5
+
+M
+
+S
+
+P1 P2
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+M
+
+S
+
+;
+6
+
+7
+
+8
+
+9
+
+10
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+M
+
+S
+
+P1 P2
+
+;
+
+Answer
+
+MW
+
+Set
+
+1
+
+2
+
+3
+
+M
+
+T
+
+P0 P0 P0 P0 P0 P1 P1 P1
+
+11
+
+12
+
+13
+
+4
+14
+
+5
+15
+
+6
+16
+
+7
+17
+
+8
+18
+
+19
+
+4
+
+5
+
+6
+
+7
+
+8
+
+MX
+Set
+Read
+Answer
+
+MZ
+Set
+
+Read
+
+Answer
+
+NA
+Set
+Read
+Answer
+
+;
+
+9
+
+10
+
+9
+
+10
+
+2
+
+3
+
+M
+
+T
+
+P0 P0 P0 P0 P0
+
+;
+
+1
+
+2
+
+3
+
+8
+
+M
+
+T
+
+P0 P0 P0 P0 P0 P1 P1 P1
+
+11
+
+12
+
+13
+
+4
+14
+
+5
+15
+
+6
+16
+
+7
+
+19
+
+20
+
+P1 P1 P1 P1 P1 P1 P1 P1 P1
+
+17
+
+18
+
+;
+
+3: VDD
+
+4: ID
+
+5: SWR
+
+2: ALC
+
+3: VDD
+
+4: ID
+
+5: SWR
+
+P0 00001 - 00099: (Memory Channel)
+P-01L - P-50U: (PMS)
+50001 - 50009: (5MHz BAND)
+EMGCH: (EMERGENCY CH)
+P1 TAG Characters (up to 12 characters) (ASCII)
+
+MEMORY CHANNEL WRITE
+1
+
+2
+
+3
+
+4
+
+M
+
+W
+
+P1 P1 P1 P1 P1 P2
+
+11
+
+12
+
+13
+
+14
+
+5
+
+15
+
+6
+
+16
+
+7
+
+17
+
+8
+
+18
+
+P2 P2 P2 P2 P2 P2 P3 P3
+22
+
+23
+
+24
+
+25
+
+26
+
+27
+
+28
+
+P3 P4 P5 P6 P7 P8 P9 P9
+
+Answer
+
+20
+
+1
+
+21
+
+Read
+
+2: ALC
+
+MEMORY CHANNEL TAG WRITE
+
+P1 P1 P1 P1 P1 P1 P1 P1 P1
+Read
+
+P1 MAIN-side
+0: PO 1: COMP
+P2 SUB-side
+0: PO 1: COMP
+
+P1 00000: 00001 - 00999: (Memory Channel)
+P2 P2
+P-01L - P-50U: (PMS)
+P2 VFO Frequency (Hz) (9 Bytes)
+19
+20 P3 Clarifier Direction +: Plus Shift, -: Minus Shift (1 Bytes)
+Clarifier Offset: 0000 - 9990 (Hz) (4 Bytes)
+P3 P3 P4 0: RX CLAR “OFF”
+1: RX CLAR “ON”
+1: TX CLAR “ON”
+P5 0: TX CLAR “OFF”
+29
+30
+P6 MODE 0:1: LSB
+2: USB
+3: CW-U
+4: FM
+5: AM
+6: RTTY-L
+7: CW-L
+8: DATA-L
+9: RTTY-U
+P10 ; 		
+		
+A: DATA-FM
+B: FM-N
+C: DATA-U
+D: AM-N
+E: PSK
+F: DATA-FM-N G: H: C4FM-DN I: C4FM-VW J: 9
+10 		
+3: Quick Memory Bank (QMB)
+P7 0: VFO 1: Memory Channel 2: Memory Tune
+4: 5: PMS
+P8 0: OFF 1: CTCSS ENC/DEC 2: CTCSS ENC 3: DCS 4: PR FREQ
+5: REV TONE
+9
+10
+P9 00: (Fixed)
+P10 0: Simplex 1: Plus Shift 2: Minus Shift
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+MOX
+1
+
+2
+
+3
+
+4
+
+M
+
+X
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+M
+
+X
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+M
+
+X
+
+P1
+
+;
+
+P1 0: MOX “OFF”
+1: MOX “ON”
+
+SPLIT MEMORY
+1
+
+2
+
+3
+
+M
+
+Z
+
+P1 P1 P1 P1 P1 P2 P3 P3
+
+4
+
+11
+
+12
+
+13
+
+17
+
+18
+
+P3 P3 P3 P3 P3 P3 P3
+
+14
+
+;
+
+1
+
+2
+
+3
+
+7
+
+8
+
+M
+
+Z
+
+P1 P1 P1 P1 P1
+
+;
+8
+
+4
+4
+
+15
+5
+
+6
+
+9
+
+10
+
+9
+
+10
+
+2
+
+3
+
+Z
+
+P1 P1 P1 P1 P1 P2 P3 P3
+
+11
+
+12
+
+13
+
+16
+
+7
+
+20
+
+1
+
+15
+
+6
+
+19
+
+M
+
+14
+
+5
+
+16
+
+17
+
+18
+
+P3 P3 P3 P3 P3 P3 P3
+
+;
+
+19
+
+20
+
+P1 00000: VFO, MT, QMB mode
+00001 - 00999: Memory channel
+P-01L - P-50U: PMS channel (P-01L, P-01U, P-02L, P-02U ------ P-50L, P50U)
+P2 0: SPLIT memory “OFF”
+1: SPLIT memory “ON”
+P3 000030000 - 470000000 Hz
+
+NARROW
+1
+
+2
+
+3
+
+4
+
+5
+
+N
+
+A
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+N
+
+A
+
+P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+N
+
+A
+
+P1 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: NARROW “OFF”
+1: NARROW “ON”
+
+20
+
+CAT (Computer Aided Transceiver) Operation
+NL
+Set
+Read
+Answer
+
+OI
+Set
+
+Read
+
+Answer
+
+NOISE BLANKER LEVEL
+1
+
+2
+
+3
+
+6
+
+7
+
+N
+
+L
+
+P1 P2 P2 P2
+
+4
+
+;
+
+1
+
+2
+
+3
+
+4
+
+N
+
+L
+
+P1
+
+;
+4
+
+5
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+N
+
+L
+
+P1 P2 P2 P2
+
+;
+
+OPPOSITE BAND INFORMATION (SUB-SIDE)
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+O
+
+I
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+O
+
+I
+
+P1 P1 P1 P1 P1 P2
+
+11
+
+12
+
+13
+
+14
+
+15
+
+16
+
+17
+
+18
+
+P2 P2 P2 P2 P2 P2 P3 P3
+21
+
+22
+
+23
+
+24
+
+25
+
+26
+
+27
+
+28
+
+P3 P4 P5 P6 P7 P8 P9 P9
+OS
+Set
+Read
+Answer
+
+PA
+Set
+
+Read
+
+Answer
+
+PB
+Set
+
+Read
+
+Answer
+
+PC
+Set
+Read
+Answer
+
+P1 0: MAIN-side
+1: SUB-side
+P2 000: OFF
+001 - 010: (NB Level)
+
+P1 00000: VFO or MT or QMB (5 Bytes)
+00001 - 00999: (Memory Channel)
+P-01L - P-50U: (PMS)
+50001 - 50020: (5MHz BAND)
+EMGCH: (EMERGENCY CH)
+9
+10
+P2 VFO Frequency (Hz) (9 Bytes)
+P3 Clarifier Direction +: Plus Shift, -: Minus Shift (1 Bytes)
+Clarifier Offset: 0000 - 9990 (Hz) (4 Bytes)
+1: RX CLAR “ON”
+9
+10 P4 0: RX CLAR “OFF”
+1: TX CLAR “ON”
+P5 0: TX CLAR “OFF”
+MODE 0:1: LSB
+2: USB
+3: CW-U
+4: FM
+P2 P2 P6
+		
+5: AM
+6: RTTY-L
+7: CW-L
+8: DATA-L
+9: RTTY-U
+		
+A: DATA-FM
+B: FM-N
+C: DATA-U
+D: AM-N
+E: PSK
+19
+20
+		
+F: DATA-FM-N G: H: C4FM-DN I: C4FM-VW J: 3: Quick Memory Bank (QMB)
+P7 0: VFO 1: Memory Channel 2: Memory Tune
+P3 P3
+4: 5: PMS
+P8 0: OFF 1: CTCSS ENC/DEC 2: CTCSS ENC 3: DCS 4: PR FREQ
+29
+30
+5: REV TONE
+P9 00: (Fixed)
+P10 ; P10 0: Simplex 1: Plus Shift 2: Minus Shift
+9
+
+10
+
+OFFSET (REPEATER SHIFT)
+1
+
+2
+
+3
+
+4
+
+5
+
+O
+
+S
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+O
+
+S
+
+P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+O
+
+S
+
+P1 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: Simplex
+1: Plus Shift (+ Offset)
+2: Minus Shift (- Offset)
+3: ARS (Automatic Repeater Shift)
+*: This command can be activated only with an FM mode.
+
+PRE-AMP (IPO)
+1
+
+2
+
+3
+
+4
+
+5
+
+P
+
+A
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P
+
+A
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P
+
+A
+
+P1 P2
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+P1 0: HF/50MHz band
+1: VHF band
+2: UHF band
+P2 P1=0 0: IPO (HF/50)
+		
+1: AMP1 (HF/50)
+		
+2: AMP2 (HF/50)
+P1=1 0: VHF Pre AMP “OFF”
+		
+1: VHF Pre AMP “ON”
+P1=2 0: UHF Pre AMP “OFF”
+		
+1: UHF Pre AMP “ON”
+
+PLAY BACK
+1
+
+2
+
+3
+
+4
+
+5
+
+P
+
+B
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P
+
+B
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P
+
+B
+
+P1 P2
+
+;
+
+8
+
+9
+
+10
+
+P1 0: (Fixed)
+P2 0: MESSAGE Playback / Recording Stop
+1: MESSAGE CH “1” Playback Start
+2: MESSAGE CH “2” Playback Start
+3: MESSAGE CH “3” Playback Start
+4: MESSAGE CH “4” Playback Start
+5: MESSAGE CH “5” Playback Start
+
+POWER CONTROL
+1
+
+2
+
+3
+
+6
+
+7
+
+P
+
+C
+
+P1 P2 P2 P2
+
+4
+
+5
+
+;
+
+1
+
+2
+
+3
+
+P
+
+C
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+P
+
+C
+
+P1 P2 P2 P2
+
+;
+
+P1 1: FTX-1 field head
+2: SPA-1
+P2 P1=1: 005 - 010 (W)
+P1=2: 005 - 100 (W)
+
+21
+
+CAT (Computer Aided Transceiver) Operation
+PL
+Set
+Read
+Answer
+
+PR
+Set
+Read
+Answer
+
+PS
+Set
+Read
+Answer
+
+QI
+Set
+Read
+Answer
+
+QR
+Set
+Read
+Answer
+
+RA
+Set
+Read
+Answer
+
+RG
+Set
+Read
+Answer
+
+RI
+Set
+Read
+Answer
+
+SPEECH PROCESSOR LEVEL
+1
+
+2
+
+3
+
+5
+
+6
+
+P
+
+L
+
+P1 P1 P1
+
+4
+
+;
+
+1
+
+2
+
+3
+
+P
+
+L
+
+;
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+5
+
+6
+
+P
+
+L
+
+P1 P1 P1
+
+;
+
+P1 000: “OFF”, 001 -100
+
+SPEECH PROCESSOR
+1
+
+2
+
+3
+
+4
+
+5
+
+P
+
+R
+
+P1 P2
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+P
+
+R
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+P
+
+R
+
+P1 P2
+
+;
+
+P1 0: Speech Processor
+1: Parametric Microphone Equalizer
+P2 1: “OFF”
+2: “ON”
+
+POWER SWITCH
+1
+
+2
+
+3
+
+4
+
+P
+
+S
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P
+
+S
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+P
+
+S
+
+P1
+
+;
+
+P1 0: POWER “OFF”
+
+QMB STORE
+1
+
+2
+
+3
+
+Q
+
+I
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+QMB RECALL
+1
+
+2
+
+3
+
+Q
+
+R
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+RF ATTENUATOR
+1
+
+2
+
+3
+
+4
+
+5
+
+R
+
+A
+
+P1 P2
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+R
+
+A
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+R
+
+A
+
+P1 P2
+
+;
+
+P1 0: (Fixed)
+P2 0: “OFF”
+1: “ON”
+
+RF GAIN
+1
+
+2
+
+3
+
+6
+
+7
+
+R
+
+G
+
+P1 P2 P2 P2
+
+4
+
+;
+
+1
+
+2
+
+3
+
+4
+
+R
+
+G
+
+P1
+
+;
+4
+
+5
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+R
+
+G
+
+P1 P2 P2 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 000 - 255
+
+RADIO INFORMATION
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+R
+
+I
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+11
+
+R
+
+I
+
+P1 P2 P3 P4 P5 P6 P7 P8
+
+;
+
+P1 0: (Fixed)
+P2 0: Normal 1: Hi-SWR
+P3 0: Stop 1: Recording 2: Playing
+P4 0: RX 1: TX 2: TX INHIBIT
+P5 0: (Fixed)
+P6: 0: Antenna tuner: Tuning stopped 1:Antenna tuner: Tuning
+P7: 0: Scan Stop 1:Scanning 2:Scan Pause
+P8: 0: SQL Closed 1: SQL Open (BUSY)
+
+22
+
+CAT (Computer Aided Transceiver) Operation
+RL
+Set
+Read
+Answer
+
+RM
+Set
+Read
+Answer
+
+SC
+Set
+Read
+Answer
+
+SD
+Set
+Read
+Answer
+
+SF
+Set
+Read
+Answer
+
+NOISE REDUCTION LEVEL (DNR)
+1
+
+2
+
+3
+
+5
+
+6
+
+R
+
+L
+
+P1 P2 P2
+
+4
+
+;
+
+5
+
+1
+
+2
+
+3
+
+4
+
+R
+
+L
+
+P1
+
+;
+4
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+5
+
+6
+
+R
+
+L
+
+P1 P2 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 00: “OFF”, 01 -10
+
+READ METER
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+1
+
+2
+
+3
+
+4
+
+R
+
+M
+
+P1
+
+;
+4
+
+1
+
+2
+
+3
+
+9
+
+10
+
+R
+
+M
+
+P1 P2 P2 P2 P3 P3 P3
+
+;
+
+P1=0
+P2: Meter 000 - 255 (MAIN-side)
+P3: Meter 000 - 255 (SUB-side)
+P1= 1: S (Main-side) 2: S (SUB-side)
+6: SWR
+7: IDD
+P2: 000 - 255
+P3: 000 (Fixed)
+
+3: COMP
+8: VDD
+
+4: ALC
+
+5: PO
+
+SCAN
+1
+
+2
+
+3
+
+4
+
+5
+
+S
+
+C
+
+P1 P2
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+S
+
+C
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+S
+
+C
+
+P1 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: Scan “OFF”
+1: Scan “ON” (UP ward)
+2: Scan “ON” (DOWN ward)
+
+CW BREAK-IN DELAY TIME
+1
+
+2
+
+3
+
+4
+
+5
+
+S
+
+D
+
+P1 P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+00: 30
+01: 50
+02: 100
+06: 300 - 33: 3000 (msec)
+
+1
+
+2
+
+3
+
+4
+
+S
+
+D
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+NOTE: 06 to 33: 100 msec steps
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+S
+
+D
+
+P1 P1
+
+;
+
+03: 150
+
+04: 200
+
+05: 250
+
+FUNC KNOB FUNCTION
+1
+
+2
+
+3
+
+4
+
+5
+
+S
+
+F
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+S
+
+F
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+S
+
+F
+
+P1 P2
+
+;
+
+4
+
+P1 0: FUNC knob
+P2 0: 4: CONTRAST
+8: PROC LEVEL
+C: G: CW PITCH
+
+23
+
+1: SCOPE LEVEL
+5: DIMMER
+9: AMC LEVEL
+D: RF POWER
+H: BK-DELAY
+
+2: PEAK
+6: A: VOX GAIN
+E: MONI LEVEL
+
+3: COLOR
+7: MIC GAIN
+B: VOX DELAY
+F: CW SPEED
+
+CAT (Computer Aided Transceiver) Operation
+SH
+Set
+Read
+Answer
+
+WIDTH
+1
+
+2
+
+3
+
+6
+
+7
+
+S
+
+H
+
+P1 P2 P3 P3
+
+4
+
+;
+
+1
+
+2
+
+3
+
+4
+
+S
+
+H
+
+P1
+
+;
+4
+
+5
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+S
+
+H
+
+P1 P2 P3 P3
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 0: (Fixed)
+P3 00 - 23 (See Table 5)
+
+Table 5 (Bandwidth Chart)
+Bandwidth
+
+Command
+P3
+
+LSB / USB
+
+00 (Default)
+01
+02
+03
+04
+05
+06
+07
+08
+09
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+
+(Default)*
+300 Hz
+400 Hz
+600 Hz
+850 Hz
+1100 Hz
+1200 Hz
+1500 Hz
+1650 Hz
+1800 Hz
+1950 Hz
+2100 Hz
+2250 Hz
+2400 Hz
+2450 Hz
+2500 Hz
+2600 Hz
+2700 Hz
+2800 Hz
+2900 Hz
+3000 Hz
+3200 Hz
+3500 Hz
+4000 Hz
+
+CW-L / CW-U /
+DATA-L / DATA-U /
+RTTY-L / RTTY-U
+PSK
+(Default)*
+50 Hz
+100 Hz
+150 Hz
+200 Hz
+250 Hz
+300 Hz
+350 Hz
+400 Hz
+450 Hz
+500 Hz
+600 Hz
+800 Hz
+1200 Hz
+1400 Hz
+1700 Hz
+2000 Hz
+2400 Hz
+3000 Hz
+3200 Hz
+3500 Hz
+4000 Hz
+-
+
+AM-N
+
+AM / FM-N /
+DATA-FM-N
+
+FM / DATA-FM
+
+6000 Hz (Fixed)
+-
+
+9000 Hz (Fixed)
+-
+
+16000 Hz (Fixed)
+-
+
+*(The default bandwidth varies depending on the selected mode.)
+SM
+Set
+Read
+Answer
+
+SQ
+Set
+Read
+Answer
+
+S-METER READING
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+8
+
+9
+
+10
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+S
+
+M
+
+P1
+
+;
+4
+
+1
+
+2
+
+3
+
+6
+
+7
+
+S
+
+M
+
+P1 P2 P2 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 000 - 255
+
+SQUELCH LEVEL
+1
+
+2
+
+3
+
+6
+
+7
+
+S
+
+Q
+
+P1 P2 P2 P2
+
+4
+
+;
+
+1
+
+2
+
+3
+
+4
+
+S
+
+Q
+
+P1
+
+;
+4
+
+5
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+6
+
+7
+
+S
+
+Q
+
+P1 P2 P2 P2
+
+;
+
+P1 0: MAIN-side
+1: SUB-side
+P2 000 - 255
+
+24
+
+CAT (Computer Aided Transceiver) Operation
+SS
+Set
+Read
+Answer
+
+ST
+Set
+Read
+Answer
+
+SV
+Set
+Read
+Answer
+
+TS
+Set
+Read
+Answer
+
+TX
+Set
+Read
+Answer
+
+SPECTRUM SCOPE
+1
+
+2
+
+3
+
+9
+
+10
+
+S
+
+S
+
+P1 P2 P3 P4 P5 P6 P7
+
+4
+
+;
+
+1
+
+2
+
+3
+
+S
+
+S
+
+P1 P2
+
+;
+
+1
+
+2
+
+3
+
+5
+
+S
+
+S
+
+4
+
+5
+
+7
+
+8
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 P2 P3 P4 P5 P6 P7
+
+;
+
+4
+
+5
+
+6
+
+P1 0: (Fixed)
+P2 0: SPEED
+6: MODE
+
+1: PEAK 2: MARKER 3: COLOR
+7: AF-FFT/OSCILLOSCOPE
+
+1
+
+2
+
+3
+
+4
+
+T
+
+P1
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+S
+
+T
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+S
+
+T
+
+P1
+
+;
+
+P1 0: SPLIT “OFF”
+1: SPLIT “ON”
+
+SWAP VFO
+1
+
+2
+
+3
+
+S
+
+V
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+Changes the MAIN-side and SUB-side
+
+TXW
+1
+
+2
+
+3
+
+4
+
+T
+
+S
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+T
+
+S
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+T
+
+S
+
+P1
+
+;
+
+P1 0: TXW “OFF”
+1: TXW “ON”
+
+TX SET
+1
+
+2
+
+3
+
+4
+
+T
+
+X
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+T
+
+X
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+T
+
+X
+
+P1
+
+;
+
+5: SPAN
+
+P2=0 (SPEED):
+		 P3 0: SLOW1 1: SLOW2 2: FAST1 3: FAST2 4: FAST3 5: STOP
+		 P4 - P7: 0: (Fixed)
+P2=1 (PEAK):
+		 P3 0: LV1 1: LV2 2: LV3 3: LV4 4: LV5
+		 P4 - P7: 0: (Fixed)
+P2=2 (MARKER):
+		 P3 0: MARKER “OFF” 1: MARKER “ON”
+		 P4 - P7: 0: (Fixed)
+P2=3 (COLOR):
+		 P3 0: COLOR-1 - A: COLOR-11
+		 P4 - P7: 0: (Fixed)
+P2=4 (LEVEL):
+		 P3 - P7: -30.0 - -00.0 or +00.0 - +30.0 (0.5 dB steps, 5 bytes)
+P2=5 (SPAN):
+		 P3 0: 1: 2: 5 kHz
+3: 10 kHz 4: 20 kHz 5: 50 kHz
+			
+6: 100 kHz 7: 200 kHz 8: 500 kHz 9: 1 MHz
+		 P4 - P7: 0: (Fixed)
+P2=6 (MODE):
+		 P3 0: 3DSS CENTER
+1: 3DSS CURSOR
+2: 3DSS FIX
+			
+3: 4: W/F CENTER (NORMAL)
+5: 			
+6: 7: W/F CURSOR (NORMAL)
+8: 			
+9: A: W/F FIX (NORMAL)
+B: 		 P4 - P7: 0: (Fixed)
+P2=7 (AF-FFT/OSCILLOSCOPE):
+		 P3 0: AF-FFT (ATT=0dB)
+1: AF-FFT (ATT=10dB)
+2: AF-FFT (ATT=20dB)
+		 P4 0: OSC Level RX (0dB) 1: OSC Level RX (10dB)
+2: OSC Level RX (20dB)
+		 P5 0: OSC Time (1 msec)
+1: OSC Time (3 msec)
+2: OSC Time (10 msec)
+			
+3: OSC Time (30 msec) 4: OSC Time (100 msec) 5: OSC Time (300 msec)
+		 P6 0: OSC Level TX (0dB) 1: OSC Level TX (10dB)
+2: OSC Level TX (20dB)
+		 P7 0: (Fixed)
+
+SPLIT
+S
+
+4: LEVEL
+
+P1 0: RADIO TX “OFF”, CAT TX “OFF”
+1: RADIO TX “OFF”, CAT TX “ON”
+2: RADIO TX “ON”, CAT TX “OFF” (Answer)
+
+25
+
+CAT (Computer Aided Transceiver) Operation
+UP
+Set
+Read
+Answer
+
+VD
+Set
+Read
+Answer
+
+VE
+Set
+Read
+Answer
+
+VG
+Set
+Read
+Answer
+
+VM
+Set
+Read
+Answer
+
+VM
+Set
+Read
+Answer
+
+VS
+Set
+Read
+Answer
+
+VX
+Set
+Read
+Answer
+
+MIC UP
+1
+
+2
+
+3
+
+U
+
+P
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+VOX DELAY TIME / DATA VOX DELAY TIME
+1
+
+2
+
+3
+
+4
+
+5
+
+V
+
+D
+
+P1 P1
+
+;
+
+6
+
+7
+
+8
+
+9
+
+10
+
+P1 00: 30 msec
+05: 250 msec
+
+1
+
+2
+
+3
+
+4
+
+V
+
+D
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+6
+
+7
+
+8
+
+9
+
+10
+
+NOTE: VD command sets individual parameter values with the setting values “MIC” and
+“USB or BLUETOOTH” in the menu items [OPERATION SETTING] → [TX GNRL] →
+→ [VOX SELECT].
+
+1
+
+2
+
+3
+
+4
+
+5
+
+V
+
+D
+
+P1 P1
+
+;
+
+01: 50 msec 02: 100 msec
+03: 150 msec
+04: 200 msec
+06: 300 msec - 33: 3000 msec (06 - 33: 10 msec multiples)
+
+FIRMWARE VERSION
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+V
+
+E
+
+P1
+
+;
+4
+
+1
+
+2
+
+3
+
+7
+
+8
+
+V
+
+E
+
+P1 P2 P2 P2 P2
+
+;
+
+P1 0: MAIN CPU 1: DISPLAY CPU
+P2 XX-XX (Binary Coded Decimal)
+
+2: SDR
+
+3: DSP
+
+4: SPA-1
+
+5: FC-80
+
+VOX GAIN
+1
+
+2
+
+3
+
+5
+
+6
+
+V
+
+G
+
+P1 P1 P1
+
+4
+
+;
+
+1
+
+2
+
+3
+
+V
+
+G
+
+;
+
+7
+
+8
+
+9
+
+10
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+4
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+5
+
+6
+
+V
+
+G
+
+P1 P1 P1
+
+;
+
+P1 000 - 100
+
+MAIN-SIDE TO MEMORY CHANNEL
+1
+
+2
+
+3
+
+V
+
+M
+
+;
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+7
+
+8
+
+9
+
+10
+
+VFO / MEMORY CHANNEL
+1
+
+2
+
+3
+
+5
+
+6
+
+V
+
+M
+
+P1 P2 P2
+
+4
+
+;
+
+1
+
+2
+
+3
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+V
+
+M
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+V
+
+M
+
+P1 P2 P2
+
+;
+
+7
+
+8
+
+9
+
+10
+
+4
+
+P1 0: MAIN-side
+1: SUB-side
+P2 00: VFO
+21: P-01L - P-50U
+
+10: MT
+51: 5MHz Band Memory
+
+VFO SELECT
+1
+
+2
+
+3
+
+4
+
+V
+
+S
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+V
+
+S
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+V
+
+S
+
+P1
+
+;
+
+5
+
+6
+
+;
+
+P1 0: MAIN-side TX/RX, SUB-side RX
+1: MAIN-side RX, SUB-side TX/RX
+
+VOX STATUS
+1
+
+2
+
+3
+
+4
+
+V
+
+X
+
+P1
+
+;
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+V
+
+X
+
+;
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+V
+
+X
+
+P1
+
+;
+
+;
+
+P1 0: VOX “OFF”
+1: VOX “ON”
+
+26
+
+11: Memory
+91: EMG
+
+20: PMS
+
+CAT (Computer Aided Transceiver) Operation
+ZI
+Set
+Read
+Answer
+
+ZERO IN
+1
+
+2
+
+3
+
+4
+
+Z
+
+I
+
+P1
+
+;
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+10
+
+(CW AUTO ZERO IN Function)
+P1 0: MAIN-side
+1: SUB-side
+
+27
+
+Copyright 2025
+YAESU MUSEN CO., LTD.
+All rights reserved.
+No portion of this manual may be
+reproduced without the permission of
+YAESU MUSEN CO., LTD.
+YAESU MUSEN CO., LTD.
+
+Omori Bellport Building D-3F
+6-26-3 Minami-Oi, Shinagawa-ku, Tokyo, 140-0013, Japan
+
+YAESU USA
+
+6125 Phyllis Drive, Cypress, CA 90630, U.S.A.
+
+YAESU UK
+
+Unit 4, Concorde Park, Concorde Way, Segensworth North,
+Fareham, Hampshire PO15 5FG, United Kingdom
+
+2507-B
+
+

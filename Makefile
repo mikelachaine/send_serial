@@ -1,21 +1,34 @@
 
 CC = gcc
-CFLAGS = `pkg-config --cflags --libs gtk+-3.0` -Wall -Wextra
-TARGET = serial-send-ui
-SOURCE = serial-send-ui.c
+CFLAGS_COMMON = -Wall -Wextra
+CFLAGS_GTK = `pkg-config --cflags --libs gtk+-3.0`
 
-all: $(TARGET)
+TARGET_CLI = serial-send
+TARGET_GUI = serial-send-ui
+SOURCE_CLI = serial_send.c
+SOURCE_GUI = serial-send-ui.c
 
-$(TARGET): $(SOURCE)
-	$(CC) -o $(TARGET) $(SOURCE) $(CFLAGS)
+all: $(TARGET_CLI) $(TARGET_GUI)
+
+$(TARGET_CLI): $(SOURCE_CLI)
+	$(CC) -o $(TARGET_CLI) $(SOURCE_CLI) $(CFLAGS_COMMON)
+
+$(TARGET_GUI): $(SOURCE_GUI)
+	$(CC) -o $(TARGET_GUI) $(SOURCE_GUI) $(CFLAGS_COMMON) $(CFLAGS_GTK)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET_CLI) $(TARGET_GUI) $(TARGET_CLI)_debug $(TARGET_GUI)_debug
 
-run: $(TARGET)
-	./$(TARGET)
+run-cli: $(TARGET_CLI)
+	./$(TARGET_CLI)
 
-debug: $(SOURCE)
-	$(CC) -g -o $(TARGET)_debug $(SOURCE) $(CFLAGS)
+run-gui: $(TARGET_GUI)
+	./$(TARGET_GUI)
 
-.PHONY: all clean run debug
+debug-cli: $(SOURCE_CLI)
+	$(CC) -g -o $(TARGET_CLI)_debug $(SOURCE_CLI) $(CFLAGS_COMMON)
+
+debug-gui: $(SOURCE_GUI)
+	$(CC) -g -o $(TARGET_GUI)_debug $(SOURCE_GUI) $(CFLAGS_COMMON) $(CFLAGS_GTK)
+
+.PHONY: all clean run-cli run-gui debug-cli debug-gui
