@@ -22,7 +22,8 @@ typedef struct {
     GtkWidget *status_label;
     GtkWidget *command_entry;
     GtkWidget *send_button;
-    GtkWidget *clear_button;  // Add this missing field
+    GtkWidget *clear_button;
+    GtkWidget *bye_button;  // Add this new field
     GtkWidget *response_textview;
     GtkTextBuffer *response_buffer;
     guint read_source_id;
@@ -61,6 +62,7 @@ void on_connect_clicked(GtkWidget *widget, gpointer data);
 void on_disconnect_clicked(GtkWidget *widget, gpointer data);
 void on_send_command(GtkWidget *widget, gpointer data);
 void on_clear_clicked(GtkWidget *widget, gpointer data);
+void on_bye_clicked(GtkWidget *widget, gpointer data);  // Add this line
 
 static speed_t baud_to_constant(int baud) {
     for (size_t i = 0; i < BAUD_TABLE_SIZE; ++i) {
@@ -288,6 +290,22 @@ void on_clear_clicked(GtkWidget *widget, gpointer data) {
     gtk_text_buffer_set_text(app_data->response_buffer, "", -1);
 }
 
+void on_bye_clicked(GtkWidget *widget, gpointer data) {
+    (void)widget;  // Mark as intentionally unused
+    AppData *app_data = (AppData *)data;
+    
+    // Disconnect if connected
+    if (app_data->connected) {
+        on_disconnect_clicked(NULL, data);
+    }
+    
+    // Add a farewell message
+    append_to_response(app_data, "Goodbye!");
+    
+    // Close the application
+    gtk_main_quit();
+}
+
 static gboolean is_dark_theme(void) {
     GtkSettings *settings = gtk_settings_get_default();
     gboolean prefer_dark = FALSE;
@@ -370,6 +388,7 @@ int main(int argc, char *argv[]) {
     app_data.command_entry = GTK_WIDGET(gtk_builder_get_object(app_data.builder, "command_entry"));
     app_data.send_button = GTK_WIDGET(gtk_builder_get_object(app_data.builder, "send_button"));
     app_data.clear_button = GTK_WIDGET(gtk_builder_get_object(app_data.builder, "clear_button"));
+    app_data.bye_button = GTK_WIDGET(gtk_builder_get_object(app_data.builder, "bye_button"));
     app_data.response_textview = GTK_WIDGET(gtk_builder_get_object(app_data.builder, "response_textview"));
     app_data.response_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(app_data.response_textview));
 
@@ -384,6 +403,7 @@ int main(int argc, char *argv[]) {
     g_signal_connect(app_data.send_button, "clicked", G_CALLBACK(on_send_command), &app_data);
     g_signal_connect(app_data.command_entry, "activate", G_CALLBACK(on_command_activate), &app_data);
     g_signal_connect(app_data.clear_button, "clicked", G_CALLBACK(on_clear_clicked), &app_data);
+    g_signal_connect(app_data.bye_button, "clicked", G_CALLBACK(on_bye_clicked), &app_data);
 
     gtk_widget_show_all(app_data.main_window);
 
