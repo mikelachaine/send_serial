@@ -246,9 +246,6 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="editable">False</property>
-                    <property name="wrap-mode">word</property>
-                    <property name="left-margin">3</property>
-                    <property name="right-margin">3</property>
                     <property name="cursor-visible">False</property>
                     <property name="monospace">True</property>
                   </object>
