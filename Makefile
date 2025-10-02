@@ -1,8 +1,8 @@
 
 CC = gcc
 CFLAGS = `pkg-config --cflags --libs gtk+-3.0` -Wall -Wextra
-TARGET = cat_test
-SOURCE = cat_test.c
+TARGET = serial-send-ui
+SOURCE = serial-send-ui.c
 
 all: $(TARGET)
 
