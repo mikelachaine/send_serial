@@ -85,7 +85,7 @@ typedef struct {
 
 /* AGC Structure */
 typedef struct {
-    agc_type_t type;
+    agc_type_t agc;     /* Fixed: was 'type', should be 'agc' */
     vfo_select_t vfo;
 } agc_info_t;
 
@@ -109,7 +109,7 @@ typedef struct {
 
 /* Power Control Structure */
 typedef struct {
-    uint8_t level;      /* 5-100 watts */
+    uint8_t watts;      /* 5-100 watts - Fixed: changed from 'level' to 'watts' */
 } power_control_t;
 
 /* CTCSS/DCS Structure */
@@ -118,6 +118,32 @@ typedef struct {
     uint8_t type;       /* 0: CTCSS, 1: DCS */
     uint8_t code;       /* Tone/DCS code number */
 } ctcss_dcs_info_t;
+
+/* Missing type definitions - adding them */
+typedef af_gain_info_t gain_info_t;  /* Generic gain info */
+typedef power_control_t power_info_t; /* Power info alias */
+
+/* Split Operation Structure */
+typedef struct {
+    bool enabled;
+} split_info_t;
+
+/* CTCSS Info Structure */
+typedef struct {
+    vfo_select_t vfo;
+    uint8_t type;       /* 0: CTCSS, 1: DCS */
+    uint8_t code;       /* Tone/DCS code number */
+} ctcss_info_t;
+
+/* Firmware Version Structure */
+typedef struct {
+    char version[32];   /* Firmware version string */
+} firmware_info_t;
+
+/* Radio Information Structure */
+typedef struct {
+    char model[32];     /* Radio model string */
+} radio_info_t;
 
 /* Function Prototypes */
 
@@ -152,13 +178,15 @@ int cat_build_radio_info_read(cat_command_t *cmd);
 /* Command Parsing Functions */
 int cat_parse_frequency_response(const char *response, frequency_info_t *freq_info);
 int cat_parse_mode_response(const char *response, mode_info_t *mode_info);
-int cat_parse_af_gain_response(const char *response, af_gain_info_t *af_info);
-int cat_parse_rf_gain_response(const char *response, rf_gain_info_t *rf_info);
+int cat_parse_af_gain_response(const char *response, gain_info_t *gain_info);
+int cat_parse_rf_gain_response(const char *response, gain_info_t *gain_info);
 int cat_parse_squelch_response(const char *response, squelch_info_t *sq_info);
-int cat_parse_power_response(const char *response, power_control_t *power_info);
+int cat_parse_power_response(const char *response, power_info_t *power_info);
 int cat_parse_agc_response(const char *response, agc_info_t *agc_info);
-int cat_parse_split_response(const char *response, bool *split_enabled);
-int cat_parse_ctcss_response(const char *response, ctcss_dcs_info_t *ctcss_info);
+int cat_parse_split_response(const char *response, split_info_t *split_info);
+int cat_parse_ctcss_response(const char *response, ctcss_info_t *ctcss_info);
+int cat_parse_firmware_version_response(const char *response, firmware_info_t *firmware_info);
+int cat_parse_radio_info_response(const char *response, radio_info_t *radio_info);
 
 /* Utility Functions */
 const char* cat_command_to_string(const cat_command_t *cmd);
