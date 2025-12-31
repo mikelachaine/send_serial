@@ -7,7 +7,7 @@ A GTK3-based graphical serial terminal for controlling Yaesu FTX-1 transceivers 
 
 - **Graphical Interface**: User-friendly GTK3 interface for serial communication
 - **Multi-Baud Rate Support**: 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600 bps
-- **CAT Protocol Support**: Full support for Yaesu FTX-1 CAT commands
+- **CAT Protocol Support**: Support for CAT commands, no need to type the ';' at the end of command
 - **Command Logging**: Timestamped send/receive message display
 - **Adaptive Theme**: Automatically detects and applies system dark/light theme
 - **Non-blocking I/O**: Responsive UI with asynchronous serial communication
