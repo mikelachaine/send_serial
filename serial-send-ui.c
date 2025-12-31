@@ -9,6 +9,9 @@
 #include <glib.h>
 #include <sys/types.h>
 
+// Include the generated resource header
+#include "serial-terminal-resources.h"
+
 // Serial communication structures and functions
 typedef struct {
     int fd;
@@ -375,13 +378,18 @@ static void apply_adaptive_theme(void) {
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
+    // Register the resource
+    g_resources_register(serial_terminal_get_resource());
+
     // Apply adaptive theme based on system settings
     apply_adaptive_theme();
 
     AppData app_data = {0};
     app_data.builder = gtk_builder_new();
-    if (!gtk_builder_add_from_file(app_data.builder, "./serial-terminal.glade", NULL)) {
-        fprintf(stderr, "Failed to load UI file\n");
+    
+    // Load from resource instead of file
+    if (!gtk_builder_add_from_resource(app_data.builder, "/com/example/serial-terminal/serial-terminal.glade", NULL)) {
+        fprintf(stderr, "Failed to load UI resource\n");
         return 1;
     }
 
