@@ -251,21 +251,25 @@ void on_send_command(GtkWidget *widget, gpointer data) {
         return;
     }
 
+    // Convert command to uppercase
+    gchar *upper_command = g_ascii_strup(command, -1);
+
     // Log the command being sent
-    gchar *sent_msg = g_strdup_printf("SENT: %s", command);
+    gchar *sent_msg = g_strdup_printf("SENT: %s", upper_command);
     append_to_response(app_data, sent_msg);
     g_free(sent_msg);
 
     // Send command
-    size_t len = strlen(command);
-    if (write(app_data->fd, command, len) != (ssize_t)len) {
+    size_t len = strlen(upper_command);
+    if (write(app_data->fd, upper_command, len) != (ssize_t)len) {
         perror("write");
         gtk_label_set_text(GTK_LABEL(app_data->status_label), "Write error");
+        g_free(upper_command);
         return;
     }
 
     // Add semicolon if not present (for CAT commands)
-    if (command[len - 1] != ';') {
+    if (upper_command[len - 1] != ';') {
         write(app_data->fd, ";", 1);
     }
     
@@ -277,6 +281,8 @@ void on_send_command(GtkWidget *widget, gpointer data) {
     
     // Update status
     gtk_label_set_text(GTK_LABEL(app_data->status_label), "Command sent");
+    
+    g_free(upper_command);
 }
 
 static void on_command_activate(GtkEntry *entry, gpointer data) {
