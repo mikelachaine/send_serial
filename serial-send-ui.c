@@ -374,7 +374,7 @@ int main(int argc, char *argv[]) {
 
     AppData app_data = {0};
     app_data.builder = gtk_builder_new();
-    if (!gtk_builder_add_from_file(app_data.builder, "serial-terminal.glade", NULL)) {
+    if (!gtk_builder_add_from_file(app_data.builder, "./serial-terminal.glade", NULL)) {
         fprintf(stderr, "Failed to load UI file\n");
         return 1;
     }
